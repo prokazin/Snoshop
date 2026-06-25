@@ -15,25 +15,11 @@
         <div class="overlay"></div>
     </div>
 
-    <!-- iOS стиль статус-бар -->
-    <div class="status-bar">
-        <span>9:41</span>
-        <div class="status-icons">
-            <span>📶</span>
-            <span>📶</span>
-            <span>🔋</span>
-        </div>
-    </div>
-
     <!-- Основной контейнер -->
     <div class="container">
         <header class="header">
             <h1>🏂 SNOWSHOP</h1>
             <p class="subtitle">Коллекция 2026</p>
-            <div class="header-actions">
-                <button class="cart-btn" onclick="toggleCart()">🛒 <span id="cartCount">0</span></button>
-                <button class="admin-btn" onclick="location.href='admin.html'">⚙️</button>
-            </div>
         </header>
 
         <!-- Категории -->
@@ -46,15 +32,6 @@
 
         <!-- Сетка товаров -->
         <div class="product-grid" id="productGrid"></div>
-
-        <!-- Корзина -->
-        <div class="cart-modal" id="cartModal">
-            <div class="cart-content">
-                <h2>Корзина</h2>
-                <div id="cartItems"></div>
-                <button onclick="closeCart()">Закрыть</button>
-            </div>
-        </div>
     </div>
 
     <script src="script.js"></script>
