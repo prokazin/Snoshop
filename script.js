@@ -1,11 +1,20 @@
 let products = [];
 let currentFilter = 'all';
+let currentProduct = null;
+let currentImageIndex = 0;
 
 // Загрузка товаров
 function loadProducts() {
     const stored = localStorage.getItem('shopProducts');
     if (stored) {
         products = JSON.parse(stored);
+        // Конвертируем старые товары (если фото было URL, оставляем как есть)
+        products = products.map(p => {
+            if (!p.images) {
+                p.images = [p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400'];
+            }
+            return p;
+        });
     } else {
         products = [
             { 
@@ -13,9 +22,8 @@ function loadProducts() {
                 name: 'Burton Custom', 
                 price: 499, 
                 category: 'boards', 
-                desc: 'Универсальная доска для фрирайда и парка', 
-                img: 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400',
-                rating: 4.8,
+                desc: 'Универсальная доска для фрирайда и парка. Идеальный баланс между стабильностью и маневренностью.', 
+                images: ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
                 inStock: true,
                 tags: ['хит', 'популярный']
             },
@@ -24,9 +32,8 @@ function loadProducts() {
                 name: 'DC Phase BOA', 
                 price: 279, 
                 category: 'boots', 
-                desc: 'Ботинки с системой быстрой шнуровки BOA', 
-                img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
-                rating: 4.5,
+                desc: 'Ботинки с системой быстрой шнуровки BOA. Максимальный комфорт и надёжная фиксация.', 
+                images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800'],
                 inStock: true,
                 tags: ['новинка']
             },
@@ -35,9 +42,8 @@ function loadProducts() {
                 name: 'Union Force', 
                 price: 199, 
                 category: 'bindings', 
-                desc: 'Надёжные крепления для любого стиля', 
-                img: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400',
-                rating: 4.7,
+                desc: 'Надёжные крепления для любого стиля катания. Лёгкие и прочные.', 
+                images: ['https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=800'],
                 inStock: true,
                 tags: ['хит']
             },
@@ -46,9 +52,8 @@ function loadProducts() {
                 name: 'Jones Mountain Twin', 
                 price: 599, 
                 category: 'boards', 
-                desc: 'Профессиональная доска для бэккантри', 
-                img: 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400',
-                rating: 4.9,
+                desc: 'Профессиональная доска для бэккантри и фрирайда. Создана для покорения гор.', 
+                images: ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
                 inStock: false,
                 tags: ['премиум']
             },
@@ -57,9 +62,8 @@ function loadProducts() {
                 name: 'Volcom Outerwear', 
                 price: 189, 
                 category: 'clothes', 
-                desc: 'Водонепроницаемая куртка для сноуборда', 
-                img: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400',
-                rating: 4.3,
+                desc: 'Водонепроницаемая куртка для сноуборда. Стиль и защита в любой погоде.', 
+                images: ['https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800'],
                 inStock: true,
                 tags: ['новинка']
             },
@@ -68,9 +72,8 @@ function loadProducts() {
                 name: 'Oakley Goggles', 
                 price: 149, 
                 category: 'clothes', 
-                desc: 'Маска с PRIZM-линзами для чёткого обзора', 
-                img: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400',
-                rating: 4.6,
+                desc: 'Маска с PRIZM-линзами для чёткого обзора в любых условиях.', 
+                images: ['https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=800'],
                 inStock: true,
                 tags: []
             }
@@ -89,7 +92,6 @@ function renderProducts(items, animate = true) {
         return;
     }
     
-    // Показываем скелетоны на 300мс (для плавности)
     if (animate) {
         grid.innerHTML = Array(6).fill(0).map(() => `
             <div class="skeleton">
@@ -106,7 +108,6 @@ function renderProducts(items, animate = true) {
     }
     
     grid.innerHTML = items.map((p, index) => {
-        // Метки
         let tagsHtml = '';
         if (p.tags && p.tags.length > 0) {
             tagsHtml = p.tags.map(tag => {
@@ -122,21 +123,21 @@ function renderProducts(items, animate = true) {
             }).join('');
         }
         
-        // Наличие
         const stockHtml = p.inStock !== undefined ? `
             <span style="color:${p.inStock ? '#34c759' : '#ff3b30'};font-size:12px;font-weight:500;">
                 ${p.inStock ? '● В наличии' : '● Нет в наличии'}
             </span>
         ` : '';
         
-        // Рейтинг
         const ratingHtml = p.rating ? `
             <span style="color:#ff9500;font-size:14px;">★ ${p.rating}</span>
         ` : '';
         
+        const imgSrc = p.images && p.images.length > 0 ? p.images[0] : (p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400');
+        
         return `
-            <div class="product-card" style="animation-delay: ${(index * 0.05).toFixed(2)}s;">
-                <img src="${p.img}" class="product-image" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400'">
+            <div class="product-card" style="animation-delay: ${(index * 0.05).toFixed(2)}s;" onclick="openProductModal(${p.id})">
+                <img src="${imgSrc}" class="product-image" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400'">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;margin-bottom:4px;">
                     <div class="product-name">${p.name}</div>
                     ${ratingHtml}
@@ -165,6 +166,93 @@ document.querySelectorAll('.cat').forEach(btn => {
         
         renderProducts(filtered, true);
     });
+});
+
+// Модальное окно товара
+function openProductModal(id) {
+    currentProduct = products.find(p => p.id === id);
+    if (!currentProduct) return;
+    
+    currentImageIndex = 0;
+    const modal = document.getElementById('productModal');
+    
+    document.getElementById('modalName').textContent = currentProduct.name;
+    document.getElementById('modalPrice').textContent = '$' + currentProduct.price;
+    document.getElementById('modalDesc').textContent = currentProduct.desc;
+    
+    // Теги
+    const tagsContainer = document.getElementById('modalTags');
+    if (currentProduct.tags && currentProduct.tags.length > 0) {
+        const colors = {
+            'хит': '#ff6b35',
+            'новинка': '#34c759',
+            'премиум': '#af52de',
+            'популярный': '#007aff'
+        };
+        tagsContainer.innerHTML = currentProduct.tags.map(tag => {
+            const color = colors[tag] || '#8e8e93';
+            return `<span class="modal-tag" style="background:${color}20;color:${color};">${tag}</span>`;
+        }).join('');
+    } else {
+        tagsContainer.innerHTML = '';
+    }
+    
+    // Наличие
+    const stockContainer = document.getElementById('modalStock');
+    if (currentProduct.inStock !== undefined) {
+        stockContainer.textContent = currentProduct.inStock ? '● В наличии' : '● Нет в наличии';
+        stockContainer.style.color = currentProduct.inStock ? '#34c759' : '#ff3b30';
+        stockContainer.style.display = 'block';
+    } else {
+        stockContainer.style.display = 'none';
+    }
+    
+    // Изображения
+    updateModalImage();
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeProductModal() {
+    document.getElementById('productModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function updateModalImage() {
+    const images = currentProduct.images || [currentProduct.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
+    const imgElement = document.getElementById('modalImage');
+    imgElement.src = images[currentImageIndex] || images[0];
+    imgElement.alt = currentProduct.name;
+    
+    document.getElementById('modalImageCounter').textContent = `${currentImageIndex + 1} / ${images.length}`;
+    
+    // Показываем/скрываем навигацию
+    const nav = document.querySelector('.modal-image-nav');
+    if (images.length <= 1) {
+        nav.style.display = 'none';
+    } else {
+        nav.style.display = 'flex';
+    }
+}
+
+function changeImage(direction) {
+    const images = currentProduct.images || [currentProduct.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
+    currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
+    updateModalImage();
+}
+
+// Закрытие по Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeProductModal();
+    }
+    if (e.key === 'ArrowLeft' && document.getElementById('productModal').classList.contains('active')) {
+        changeImage(-1);
+    }
+    if (e.key === 'ArrowRight' && document.getElementById('productModal').classList.contains('active')) {
+        changeImage(1);
+    }
 });
 
 // Синхронизация между вкладками
