@@ -523,16 +523,21 @@
         function loadAdminProducts() {
             const stored = localStorage.getItem('shopProducts');
             if (stored) {
-                products = JSON.parse(stored);
-                products = products.map(p => {
-                    if (!p.images) {
-                        p.images = [p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
-                    }
-                    if (!p.specs) {
-                        p.specs = {};
-                    }
-                    return p;
-                });
+                try {
+                    products = JSON.parse(stored);
+                    // Убеждаемся, что у каждого товара есть images и specs
+                    products = products.map(p => {
+                        if (!p.images) {
+                            p.images = [p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
+                        }
+                        if (!p.specs) {
+                            p.specs = {};
+                        }
+                        return p;
+                    });
+                } catch (e) {
+                    products = [];
+                }
             } else {
                 products = [];
             }
@@ -608,7 +613,7 @@
                 const q = searchQuery.toLowerCase();
                 filtered = filtered.filter(p => 
                     p.name.toLowerCase().includes(q) || 
-                    p.desc.toLowerCase().includes(q)
+                    (p.desc && p.desc.toLowerCase().includes(q))
                 );
             }
             
@@ -694,6 +699,7 @@
             const images = tempImages.length > 0 ? tempImages : ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
 
             if (editId) {
+                // Редактирование
                 const index = products.findIndex(p => p.id === parseInt(editId));
                 if (index !== -1) {
                     products[index] = {
@@ -714,6 +720,7 @@
                 document.getElementById('submitBtn').textContent = '➕ Добавить';
                 document.getElementById('cancelBtn').style.display = 'none';
             } else {
+                // Добавление
                 const newProduct = {
                     id: Date.now(),
                     name: name,
@@ -730,7 +737,10 @@
                 showToast('✅ Товар добавлен!');
             }
             
+            // Сохраняем в localStorage
             localStorage.setItem('shopProducts', JSON.stringify(products));
+            
+            // Обновляем отображение
             renderAdminList();
             updateStats();
             clearForm();
