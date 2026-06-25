@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-panel {
+            max-width: 700px;
+            margin: 40px auto;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(30px);
+            padding: 30px;
+            border-radius: 32px;
+            border: 0.5px solid rgba(255,255,255,0.1);
+        }
+        .admin-panel input, .admin-panel textarea, .admin-panel select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 16px;
+            border-radius: 16px;
+            border: 0.5px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+        }
+        .admin-panel button {
+            padding: 14px 30px;
+            border-radius: 30px;
+            border: none;
+            background: #007aff;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .admin-panel button:hover {
+            opacity: 0.8;
+            transform: scale(1.02);
+        }
+        .admin-list {
+            margin-top: 30px;
+        }
+        .admin-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 0.5px solid rgba(255,255,255,0.05);
+        }
+        .admin-item button {
+            background: #ff3b30;
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="video-bg">
+        <video autoplay muted loop playsinline>
+            <source src="assets/video-bg.mp4" type="video/mp4">
+        </video>
+        <div class="overlay"></div>
+    </div>
+
+    <div class="container">
+        <div class="admin-panel">
+            <h2 style="margin-bottom:20px;">⚙️ Управление товарами</h2>
+            
+            <input type="text" id="productName" placeholder="Название">
+            <input type="number" id="productPrice" placeholder="Цена">
+            <select id="productCategory">
+                <option value="boards">Доски</option>
+                <option value="boots">Ботинки</option>
+                <option value="bindings">Крепления</option>
+            </select>
+            <input type="text" id="productImg" placeholder="URL изображения">
+            <textarea id="productDesc" placeholder="Описание" rows="3"></textarea>
+            
+            <button onclick="addProduct()">➕ Добавить товар</button>
+
+            <div class="admin-list" id="adminProductList"></div>
+            <button onclick="location.href='index.html'" style="margin-top:20px;background:rgba(255,255,255,0.1);">← Назад в магазин</button>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
