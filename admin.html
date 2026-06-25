@@ -590,6 +590,8 @@
             const list = document.getElementById('adminProductList');
             if (!list) return;
             
+            console.log('renderAdminList вызван, товаров:', products.length);
+            
             let filtered = [...products];
             
             if (searchQuery) {
@@ -725,7 +727,12 @@
                 showToast('✅ Товар добавлен!');
             }
             
+            // Сохраняем в localStorage
             localStorage.setItem('shopProducts', JSON.stringify(products));
+            
+            console.log('Товары после сохранения:', products);
+            
+            // Обновляем отображение
             renderAdminList();
             updateStats();
             clearForm();
