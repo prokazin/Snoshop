@@ -3,6 +3,11 @@ let currentFilter = 'all';
 let currentProduct = null;
 let currentImageIndex = 0;
 
+// Форматирование цены в рубли
+function formatPrice(price) {
+    return price.toLocaleString('ru-RU') + ' ₽';
+}
+
 // Загрузка товаров
 function loadProducts() {
     const stored = localStorage.getItem('shopProducts');
@@ -12,6 +17,9 @@ function loadProducts() {
             if (!p.images) {
                 p.images = [p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
             }
+            if (!p.specs) {
+                p.specs = {};
+            }
             return p;
         });
     } else {
@@ -19,18 +27,18 @@ function loadProducts() {
             { 
                 id: 1, 
                 name: 'Burton Custom', 
-                price: 499, 
+                price: 49900, 
                 category: 'boards', 
                 desc: 'Универсальная доска для фрирайда и парка. Идеальный баланс между стабильностью и маневренностью.', 
                 images: ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
                 inStock: true,
                 tags: ['хит', 'популярный'],
-                specs: { flex: 'Средняя', size: '158', color: 'Синий' }
+                specs: { flex: 'Средняя 5/10', size: '158 см', color: 'Синий' }
             },
             { 
                 id: 2, 
                 name: 'DC Phase BOA', 
-                price: 279, 
+                price: 27900, 
                 category: 'boots', 
                 desc: 'Ботинки с системой быстрой шнуровки BOA. Максимальный комфорт и надёжная фиксация.', 
                 images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800'],
@@ -41,7 +49,7 @@ function loadProducts() {
             { 
                 id: 3, 
                 name: 'Union Force', 
-                price: 199, 
+                price: 19900, 
                 category: 'bindings', 
                 desc: 'Надёжные крепления для любого стиля катания. Лёгкие и прочные.', 
                 images: ['https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=800'],
@@ -52,18 +60,18 @@ function loadProducts() {
             { 
                 id: 4, 
                 name: 'Jones Mountain Twin', 
-                price: 599, 
+                price: 59900, 
                 category: 'boards', 
                 desc: 'Профессиональная доска для бэккантри и фрирайда. Создана для покорения гор.', 
                 images: ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
                 inStock: false,
                 tags: ['премиум'],
-                specs: { flex: 'Жёсткая', size: '162', color: 'Зелёный' }
+                specs: { flex: 'Жёсткая 8/10', size: '162 см', color: 'Зелёный' }
             },
             { 
                 id: 5, 
                 name: 'Volcom Outerwear', 
-                price: 189, 
+                price: 18900, 
                 category: 'clothes', 
                 desc: 'Водонепроницаемая куртка для сноуборда. Стиль и защита в любой погоде.', 
                 images: ['https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800'],
@@ -74,7 +82,7 @@ function loadProducts() {
             { 
                 id: 6, 
                 name: 'Oakley Goggles', 
-                price: 149, 
+                price: 14900, 
                 category: 'clothes', 
                 desc: 'Маска с PRIZM-линзами для чёткого обзора в любых условиях.', 
                 images: ['https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=800'],
@@ -147,7 +155,7 @@ function renderProducts(items, animate = true) {
                     <div class="product-name">${p.name}</div>
                     ${ratingHtml}
                 </div>
-                <div class="product-price">$${p.price}</div>
+                <div class="product-price">${formatPrice(p.price)}</div>
                 <div class="product-desc">${p.desc}</div>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
                     <div>${tagsHtml}</div>
@@ -173,7 +181,7 @@ document.querySelectorAll('.cat').forEach(btn => {
     });
 });
 
-// Модальное окно товара
+// Модальное окно товара (БЕЗ ИКОНОК)
 function openProductModal(id) {
     currentProduct = products.find(p => p.id === id);
     if (!currentProduct) return;
@@ -182,13 +190,14 @@ function openProductModal(id) {
     const modal = document.getElementById('productModal');
     
     document.getElementById('modalName').textContent = currentProduct.name;
-    document.getElementById('modalPrice').textContent = '$' + currentProduct.price;
+    document.getElementById('modalPrice').textContent = formatPrice(currentProduct.price);
     document.getElementById('modalDesc').textContent = currentProduct.desc;
     
-    // Характеристики
+    // Характеристики — ТОЛЬКО ТЕКСТ, БЕЗ ИКОНОК
     const specsContainer = document.getElementById('modalSpecs');
     const specs = currentProduct.specs || {};
     const specItems = [];
+    
     if (specs.flex) specItems.push({ label: 'Жёсткость', value: specs.flex });
     if (specs.size) specItems.push({ label: 'Размер', value: specs.size });
     if (specs.color) specItems.push({ label: 'Цвет', value: specs.color });
@@ -196,7 +205,8 @@ function openProductModal(id) {
     if (specItems.length > 0) {
         specsContainer.innerHTML = specItems.map(s => `
             <span class="spec">
-                <span class="label">${s.label}:</span> ${s.value}
+                <span class="label">${s.label}:</span>
+                <span class="value">${s.value}</span>
             </span>
         `).join('');
         specsContainer.style.display = 'flex';
