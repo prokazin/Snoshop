@@ -255,6 +255,74 @@
             0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
             100% { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
+        
+        /* Загрузка изображений */
+        .image-upload-area {
+            border: 2px dashed rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin: 6px 0 14px;
+            transition: 0.3s;
+            cursor: pointer;
+            background: rgba(255,255,255,0.02);
+        }
+        .image-upload-area:hover {
+            border-color: rgba(0, 122, 255, 0.3);
+            background: rgba(255,255,255,0.04);
+        }
+        .image-upload-area.dragover {
+            border-color: #007aff;
+            background: rgba(0, 122, 255, 0.05);
+        }
+        .image-upload-area .icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .image-upload-area .text {
+            color: rgba(255,255,255,0.3);
+            font-size: 14px;
+        }
+        .image-upload-area input[type="file"] {
+            display: none;
+        }
+        .image-preview-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .image-preview {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 0.5px solid rgba(255,255,255,0.06);
+        }
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .image-preview .remove-image {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 30px;
+            background: #ff3b30;
+            color: #fff;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         @media (max-width: 640px) {
             .admin-panel {
                 padding: 20px;
@@ -286,6 +354,10 @@
             }
             .admin-search input {
                 width: 100%;
+            }
+            .image-preview {
+                width: 60px;
+                height: 60px;
             }
         }
     </style>
@@ -350,7 +422,15 @@
                         <option value="bindings">Крепления</option>
                         <option value="clothes">Одежда</option>
                     </select>
-                    <input type="text" id="productImg" placeholder="URL изображения" class="admin-input">
+                    
+                    <!-- Загрузка изображений -->
+                    <div class="image-upload-area" id="imageUploadArea" onclick="document.getElementById('imageInput').click()">
+                        <span class="icon">📸</span>
+                        <div class="text">Нажмите или перетащите фото для загрузки</div>
+                        <input type="file" id="imageInput" accept="image/*" multiple onchange="handleImageUpload(event)">
+                    </div>
+                    <div class="image-preview-container" id="imagePreviewContainer"></div>
+                    
                     <textarea id="productDesc" placeholder="Описание" rows="2" class="admin-input"></textarea>
                     
                     <div class="checkbox-group">
@@ -389,6 +469,7 @@
         let products = [];
         let searchQuery = '';
         let currentSort = '';
+        let tempImages = [];
 
         function checkPassword() {
             const pass = document.getElementById('adminPassword').value;
@@ -406,6 +487,12 @@
             const stored = localStorage.getItem('shopProducts');
             if (stored) {
                 products = JSON.parse(stored);
+                products = products.map(p => {
+                    if (!p.images) {
+                        p.images = [p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
+                    }
+                    return p;
+                });
             } else {
                 products = [];
             }
@@ -413,13 +500,70 @@
             updateStats();
         }
 
+        // Загрузка изображений
+        function handleImageUpload(event) {
+            const files = event.target.files;
+            for (const file of files) {
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('❌ Файл слишком большой (макс. 5MB)');
+                    continue;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempImages.push(e.target.result);
+                    renderImagePreviews();
+                };
+                reader.readAsDataURL(file);
+            }
+            event.target.value = '';
+        }
+
+        function renderImagePreviews() {
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = tempImages.map((img, index) => `
+                <div class="image-preview">
+                    <img src="${img}" alt="Фото">
+                    <button class="remove-image" onclick="removeImage(${index})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function removeImage(index) {
+            tempImages.splice(index, 1);
+            renderImagePreviews();
+        }
+
+        // Drag & Drop
+        const uploadArea = document.getElementById('imageUploadArea');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            for (const file of files) {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        tempImages.push(ev.target.result);
+                        renderImagePreviews();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
         function renderAdminList() {
             const list = document.getElementById('adminProductList');
             if (!list) return;
             
             let filtered = [...products];
             
-            // Поиск
             if (searchQuery) {
                 const q = searchQuery.toLowerCase();
                 filtered = filtered.filter(p => 
@@ -428,7 +572,6 @@
                 );
             }
             
-            // Сортировка
             if (currentSort === 'name') {
                 filtered.sort((a, b) => a.name.localeCompare(b.name));
             } else if (currentSort === 'price') {
@@ -445,6 +588,7 @@
             list.innerHTML = filtered.map(p => {
                 const tags = p.tags || [];
                 const tagsStr = tags.map(t => `<span style="background:rgba(255,255,255,0.04);padding:2px 8px;border-radius:8px;font-size:11px;color:rgba(255,255,255,0.4);">${t}</span>`).join(' ');
+                const imagesCount = p.images ? p.images.length : 0;
                 return `
                 <div class="admin-item">
                     <div class="admin-item-info">
@@ -452,6 +596,7 @@
                         <span class="price">$${p.price}</span>
                         <span class="category-badge">${p.category}</span>
                         <span style="color:${p.inStock !== false ? '#34c759' : '#ff3b30'};font-size:12px;">${p.inStock !== false ? '✓' : '✕'}</span>
+                        <span style="font-size:11px;color:rgba(255,255,255,0.2);">📸 ${imagesCount}</span>
                         <span style="font-size:12px;color:rgba(255,255,255,0.3);">${tagsStr}</span>
                     </div>
                     <div class="admin-item-actions">
@@ -475,7 +620,6 @@
             const name = document.getElementById('productName').value.trim();
             const price = parseFloat(document.getElementById('productPrice').value);
             const category = document.getElementById('productCategory').value;
-            const img = document.getElementById('productImg').value.trim();
             const desc = document.getElementById('productDesc').value.trim();
             const inStock = document.getElementById('inStock').checked;
             
@@ -489,8 +633,10 @@
                 return;
             }
 
+            // Используем загруженные изображения или дефолтное
+            const images = tempImages.length > 0 ? tempImages : ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
+
             if (editId) {
-                // Редактирование
                 const index = products.findIndex(p => p.id === parseInt(editId));
                 if (index !== -1) {
                     products[index] = {
@@ -498,10 +644,10 @@
                         name,
                         price,
                         category,
-                        img: img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400',
                         desc: desc || 'Без описания',
                         inStock,
-                        tags
+                        tags,
+                        images: images
                     };
                     showToast('✅ Товар обновлён!');
                 }
@@ -510,16 +656,15 @@
                 document.getElementById('submitBtn').textContent = '➕ Добавить';
                 document.getElementById('cancelBtn').style.display = 'none';
             } else {
-                // Добавление
                 const newProduct = {
                     id: Date.now(),
                     name: name,
                     price: price,
                     category: category,
-                    img: img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400',
                     desc: desc || 'Без описания',
                     inStock: inStock,
                     tags: tags,
+                    images: images,
                     rating: 0
                 };
                 products.push(newProduct);
@@ -540,12 +685,15 @@
             document.getElementById('productName').value = p.name;
             document.getElementById('productPrice').value = p.price;
             document.getElementById('productCategory').value = p.category;
-            document.getElementById('productImg').value = p.img || '';
             document.getElementById('productDesc').value = p.desc || '';
             document.getElementById('inStock').checked = p.inStock !== false;
             document.getElementById('isHit').checked = (p.tags || []).includes('хит');
             document.getElementById('isNew').checked = (p.tags || []).includes('новинка');
             document.getElementById('isPremium').checked = (p.tags || []).includes('премиум');
+            
+            // Загружаем существующие изображения
+            tempImages = p.images ? [...p.images] : [];
+            renderImagePreviews();
             
             document.getElementById('formTitle').textContent = '✎ Редактировать товар';
             document.getElementById('submitBtn').textContent = '💾 Сохранить';
@@ -570,7 +718,8 @@
                 ...p,
                 id: Date.now(),
                 name: p.name + ' (копия)',
-                tags: [...(p.tags || [])]
+                tags: [...(p.tags || [])],
+                images: [...(p.images || [])]
             };
             products.push(copy);
             localStorage.setItem('shopProducts', JSON.stringify(products));
@@ -646,12 +795,13 @@
         function clearForm() {
             document.getElementById('productName').value = '';
             document.getElementById('productPrice').value = '';
-            document.getElementById('productImg').value = '';
             document.getElementById('productDesc').value = '';
             document.getElementById('inStock').checked = true;
             document.getElementById('isHit').checked = false;
             document.getElementById('isNew').checked = false;
             document.getElementById('isPremium').checked = false;
+            tempImages = [];
+            renderImagePreviews();
         }
 
         function showToast(message) {
