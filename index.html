@@ -35,6 +35,33 @@
         <div class="product-grid" id="productGrid"></div>
     </div>
 
+    <!-- Модальное окно товара -->
+    <div class="product-modal" id="productModal">
+        <div class="modal-overlay" onclick="closeProductModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeProductModal()">✕</button>
+            
+            <div class="modal-image-container">
+                <img id="modalImage" src="" alt="" class="modal-image">
+                <div class="modal-image-nav">
+                    <button class="modal-nav-btn prev" onclick="changeImage(-1)">‹</button>
+                    <span id="modalImageCounter" class="image-counter">1 / 1</span>
+                    <button class="modal-nav-btn next" onclick="changeImage(1)">›</button>
+                </div>
+            </div>
+            
+            <div class="modal-info">
+                <div class="modal-header">
+                    <h2 id="modalName"></h2>
+                    <span id="modalPrice" class="modal-price"></span>
+                </div>
+                <div class="modal-tags" id="modalTags"></div>
+                <div class="modal-stock" id="modalStock"></div>
+                <p id="modalDesc" class="modal-desc"></p>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
