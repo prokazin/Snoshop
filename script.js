@@ -8,10 +8,9 @@ function loadProducts() {
     const stored = localStorage.getItem('shopProducts');
     if (stored) {
         products = JSON.parse(stored);
-        // Конвертируем старые товары (если фото было URL, оставляем как есть)
         products = products.map(p => {
             if (!p.images) {
-                p.images = [p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400'];
+                p.images = [p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
             }
             return p;
         });
@@ -25,7 +24,8 @@ function loadProducts() {
                 desc: 'Универсальная доска для фрирайда и парка. Идеальный баланс между стабильностью и маневренностью.', 
                 images: ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
                 inStock: true,
-                tags: ['хит', 'популярный']
+                tags: ['хит', 'популярный'],
+                specs: { flex: 'Средняя', size: '158', color: 'Синий' }
             },
             { 
                 id: 2, 
@@ -35,7 +35,8 @@ function loadProducts() {
                 desc: 'Ботинки с системой быстрой шнуровки BOA. Максимальный комфорт и надёжная фиксация.', 
                 images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800'],
                 inStock: true,
-                tags: ['новинка']
+                tags: ['новинка'],
+                specs: { flex: 'Средняя', size: '42', color: 'Чёрный' }
             },
             { 
                 id: 3, 
@@ -45,7 +46,8 @@ function loadProducts() {
                 desc: 'Надёжные крепления для любого стиля катания. Лёгкие и прочные.', 
                 images: ['https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=800'],
                 inStock: true,
-                tags: ['хит']
+                tags: ['хит'],
+                specs: { flex: 'Жёсткая', size: 'M', color: 'Серый' }
             },
             { 
                 id: 4, 
@@ -55,7 +57,8 @@ function loadProducts() {
                 desc: 'Профессиональная доска для бэккантри и фрирайда. Создана для покорения гор.', 
                 images: ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
                 inStock: false,
-                tags: ['премиум']
+                tags: ['премиум'],
+                specs: { flex: 'Жёсткая', size: '162', color: 'Зелёный' }
             },
             { 
                 id: 5, 
@@ -65,7 +68,8 @@ function loadProducts() {
                 desc: 'Водонепроницаемая куртка для сноуборда. Стиль и защита в любой погоде.', 
                 images: ['https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800'],
                 inStock: true,
-                tags: ['новинка']
+                tags: ['новинка'],
+                specs: { size: 'L', color: 'Красный' }
             },
             { 
                 id: 6, 
@@ -75,7 +79,8 @@ function loadProducts() {
                 desc: 'Маска с PRIZM-линзами для чёткого обзора в любых условиях.', 
                 images: ['https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=800'],
                 inStock: true,
-                tags: []
+                tags: [],
+                specs: { color: 'Синий' }
             }
         ];
         localStorage.setItem('shopProducts', JSON.stringify(products));
@@ -180,6 +185,25 @@ function openProductModal(id) {
     document.getElementById('modalPrice').textContent = '$' + currentProduct.price;
     document.getElementById('modalDesc').textContent = currentProduct.desc;
     
+    // Характеристики
+    const specsContainer = document.getElementById('modalSpecs');
+    const specs = currentProduct.specs || {};
+    const specItems = [];
+    if (specs.flex) specItems.push({ label: 'Жёсткость', value: specs.flex });
+    if (specs.size) specItems.push({ label: 'Размер', value: specs.size });
+    if (specs.color) specItems.push({ label: 'Цвет', value: specs.color });
+    
+    if (specItems.length > 0) {
+        specsContainer.innerHTML = specItems.map(s => `
+            <span class="spec">
+                <span class="label">${s.label}:</span> ${s.value}
+            </span>
+        `).join('');
+        specsContainer.style.display = 'flex';
+    } else {
+        specsContainer.style.display = 'none';
+    }
+    
     // Теги
     const tagsContainer = document.getElementById('modalTags');
     if (currentProduct.tags && currentProduct.tags.length > 0) {
@@ -227,7 +251,6 @@ function updateModalImage() {
     
     document.getElementById('modalImageCounter').textContent = `${currentImageIndex + 1} / ${images.length}`;
     
-    // Показываем/скрываем навигацию
     const nav = document.querySelector('.modal-image-nav');
     if (images.length <= 1) {
         nav.style.display = 'none';
