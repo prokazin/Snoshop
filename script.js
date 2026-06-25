@@ -12,101 +12,76 @@ function formatPrice(price) {
 function loadProducts() {
     const stored = localStorage.getItem('shopProducts');
     if (stored) {
-        products = JSON.parse(stored);
-        products = products.map(p => {
-            if (!p.images) {
-                p.images = [p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
-            }
-            if (!p.specs) {
-                p.specs = {};
-            }
-            return p;
-        });
+        try {
+            products = JSON.parse(stored);
+            // Убеждаемся, что у каждого товара есть все поля
+            products = products.map(p => ({
+                ...p,
+                images: p.images || [p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
+                specs: p.specs || {},
+                tags: p.tags || [],
+                inStock: p.inStock !== undefined ? p.inStock : true
+            }));
+        } catch (e) {
+            products = getDefaultProducts();
+        }
     } else {
-        products = [
-            { 
-                id: 1, 
-                name: 'Burton Custom', 
-                price: 49900, 
-                category: 'boards', 
-                desc: 'Универсальная доска для фрирайда и парка. Идеальный баланс между стабильностью и маневренностью.', 
-                images: ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
-                inStock: true,
-                tags: ['хит', 'популярный'],
-                specs: { flex: 'Средняя 5/10', size: '158 см', color: 'Синий' }
-            },
-            { 
-                id: 2, 
-                name: 'DC Phase BOA', 
-                price: 27900, 
-                category: 'boots', 
-                desc: 'Ботинки с системой быстрой шнуровки BOA. Максимальный комфорт и надёжная фиксация.', 
-                images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800'],
-                inStock: true,
-                tags: ['новинка'],
-                specs: { flex: 'Средняя', size: '42', color: 'Чёрный' }
-            },
-            { 
-                id: 3, 
-                name: 'Union Force', 
-                price: 19900, 
-                category: 'bindings', 
-                desc: 'Надёжные крепления для любого стиля катания. Лёгкие и прочные.', 
-                images: ['https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=800'],
-                inStock: true,
-                tags: ['хит'],
-                specs: { flex: 'Жёсткая', size: 'M', color: 'Серый' }
-            },
-            { 
-                id: 4, 
-                name: 'Jones Mountain Twin', 
-                price: 59900, 
-                category: 'boards', 
-                desc: 'Профессиональная доска для бэккантри и фрирайда. Создана для покорения гор.', 
-                images: ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
-                inStock: false,
-                tags: ['премиум'],
-                specs: { flex: 'Жёсткая 8/10', size: '162 см', color: 'Зелёный' }
-            },
-            { 
-                id: 5, 
-                name: 'Volcom Outerwear', 
-                price: 18900, 
-                category: 'clothes', 
-                desc: 'Водонепроницаемая куртка для сноуборда. Стиль и защита в любой погоде.', 
-                images: ['https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800'],
-                inStock: true,
-                tags: ['новинка'],
-                specs: { size: 'L', color: 'Красный' }
-            },
-            { 
-                id: 6, 
-                name: 'Oakley Goggles', 
-                price: 14900, 
-                category: 'clothes', 
-                desc: 'Маска с PRIZM-линзами для чёткого обзора в любых условиях.', 
-                images: ['https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=800'],
-                inStock: true,
-                tags: [],
-                specs: { color: 'Синий' }
-            }
-        ];
-        localStorage.setItem('shopProducts', JSON.stringify(products));
+        products = getDefaultProducts();
     }
     renderProducts(products, true);
+}
+
+function getDefaultProducts() {
+    const defaults = [
+        { 
+            id: 1, 
+            name: 'Burton Custom', 
+            price: 49900, 
+            category: 'boards', 
+            desc: 'Универсальная доска для фрирайда и парка.', 
+            images: ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
+            inStock: true,
+            tags: ['хит'],
+            specs: { flex: 'Средняя 5/10', size: '158 см', color: 'Синий' }
+        },
+        { 
+            id: 2, 
+            name: 'DC Phase BOA', 
+            price: 27900, 
+            category: 'boots', 
+            desc: 'Ботинки с системой быстрой шнуровки BOA.', 
+            images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800'],
+            inStock: true,
+            tags: ['новинка'],
+            specs: { flex: 'Средняя', size: '42', color: 'Чёрный' }
+        },
+        { 
+            id: 3, 
+            name: 'Union Force', 
+            price: 19900, 
+            category: 'bindings', 
+            desc: 'Надёжные крепления для любого стиля.', 
+            images: ['https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=800'],
+            inStock: true,
+            tags: ['хит'],
+            specs: { flex: 'Жёсткая', size: 'M', color: 'Серый' }
+        }
+    ];
+    localStorage.setItem('shopProducts', JSON.stringify(defaults));
+    return defaults;
 }
 
 function renderProducts(items, animate = true) {
     const grid = document.getElementById('productGrid');
     if (!grid) return;
     
-    if (items.length === 0) {
+    if (!items || items.length === 0) {
         grid.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.3);padding:40px 0;">Товары временно отсутствуют</p>';
         return;
     }
     
     if (animate) {
-        grid.innerHTML = Array(6).fill(0).map(() => `
+        grid.innerHTML = Array(Math.min(items.length, 6)).fill(0).map(() => `
             <div class="skeleton">
                 <div class="skeleton-image"></div>
                 <div class="skeleton-text"></div>
@@ -142,21 +117,16 @@ function renderProducts(items, animate = true) {
             </span>
         ` : '';
         
-        const ratingHtml = p.rating ? `
-            <span style="color:#ff9500;font-size:14px;">★ ${p.rating}</span>
-        ` : '';
-        
-        const imgSrc = p.images && p.images.length > 0 ? p.images[0] : (p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400');
+        const imgSrc = p.images && p.images.length > 0 ? p.images[0] : 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400';
         
         return `
             <div class="product-card" style="animation-delay: ${(index * 0.05).toFixed(2)}s;" onclick="openProductModal(${p.id})">
                 <img src="${imgSrc}" class="product-image" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400'">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;margin-bottom:4px;">
                     <div class="product-name">${p.name}</div>
-                    ${ratingHtml}
                 </div>
                 <div class="product-price">${formatPrice(p.price)}</div>
-                <div class="product-desc">${p.desc}</div>
+                <div class="product-desc">${p.desc || 'Без описания'}</div>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
                     <div>${tagsHtml}</div>
                     ${stockHtml}
@@ -181,7 +151,7 @@ document.querySelectorAll('.cat').forEach(btn => {
     });
 });
 
-// Модальное окно товара (БЕЗ ИКОНОК)
+// Модальное окно товара
 function openProductModal(id) {
     currentProduct = products.find(p => p.id === id);
     if (!currentProduct) return;
@@ -191,9 +161,9 @@ function openProductModal(id) {
     
     document.getElementById('modalName').textContent = currentProduct.name;
     document.getElementById('modalPrice').textContent = formatPrice(currentProduct.price);
-    document.getElementById('modalDesc').textContent = currentProduct.desc;
+    document.getElementById('modalDesc').textContent = currentProduct.desc || 'Без описания';
     
-    // Характеристики — ТОЛЬКО ТЕКСТ, БЕЗ ИКОНОК
+    // Характеристики
     const specsContainer = document.getElementById('modalSpecs');
     const specs = currentProduct.specs || {};
     const specItems = [];
@@ -254,7 +224,7 @@ function closeProductModal() {
 }
 
 function updateModalImage() {
-    const images = currentProduct.images || [currentProduct.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
+    const images = currentProduct.images || ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
     const imgElement = document.getElementById('modalImage');
     imgElement.src = images[currentImageIndex] || images[0];
     imgElement.alt = currentProduct.name;
@@ -270,7 +240,7 @@ function updateModalImage() {
 }
 
 function changeImage(direction) {
-    const images = currentProduct.images || [currentProduct.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
+    const images = currentProduct.images || ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
     currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
     updateModalImage();
 }
@@ -291,11 +261,13 @@ document.addEventListener('keydown', (e) => {
 // Синхронизация между вкладками
 window.addEventListener('storage', (e) => {
     if (e.key === 'shopProducts') {
-        products = JSON.parse(e.newValue);
-        const filtered = currentFilter === 'all' 
-            ? products 
-            : products.filter(p => p.category === currentFilter);
-        renderProducts(filtered, true);
+        try {
+            products = JSON.parse(e.newValue);
+            const filtered = currentFilter === 'all' 
+                ? products 
+                : products.filter(p => p.category === currentFilter);
+            renderProducts(filtered, true);
+        } catch (e) {}
     }
 });
 
