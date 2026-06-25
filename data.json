@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "name": "Burton Custom",
+        "price": 499,
+        "category": "boards",
+        "desc": "Универсальная доска для фрирайда и парка",
+        "img": "https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400"
+    },
+    {
+        "id": 2,
+        "name": "DC Phase BOA",
+        "price": 279,
+        "category": "boots",
+        "desc": "Ботинки с системой быстрой шнуровки BOA",
+        "img": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400"
+    },
+    {
+        "id": 3,
+        "name": "Union Force",
+        "price": 199,
+        "category": "bindings",
+        "desc": "Надёжные крепления для любого стиля",
+        "img": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400"
+    }
+]
