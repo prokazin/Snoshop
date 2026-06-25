@@ -1,36 +1,66 @@
 let products = [];
-let cart = [];
 
 // Загрузка товаров
-async function loadProducts() {
-    try {
-        const res = await fetch('data.json');
-        products = await res.json();
-        renderProducts(products);
-    } catch {
-        // Если data.json нет - используем дефолтные
-        products = defaultProducts();
-        renderProducts(products);
+function loadProducts() {
+    const stored = localStorage.getItem('shopProducts');
+    if (stored) {
+        products = JSON.parse(stored);
+    } else {
+        // Дефолтные товары
+        products = [
+            { 
+                id: 1, 
+                name: 'Burton Custom', 
+                price: 499, 
+                category: 'boards', 
+                desc: 'Универсальная доска для фрирайда и парка', 
+                img: 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400' 
+            },
+            { 
+                id: 2, 
+                name: 'DC Phase BOA', 
+                price: 279, 
+                category: 'boots', 
+                desc: 'Ботинки с системой быстрой шнуровки BOA', 
+                img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400' 
+            },
+            { 
+                id: 3, 
+                name: 'Union Force', 
+                price: 199, 
+                category: 'bindings', 
+                desc: 'Надёжные крепления для любого стиля', 
+                img: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400' 
+            },
+            { 
+                id: 4, 
+                name: 'Jones Mountain Twin', 
+                price: 599, 
+                category: 'boards', 
+                desc: 'Профессиональная доска для бэккантри', 
+                img: 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400' 
+            }
+        ];
+        localStorage.setItem('shopProducts', JSON.stringify(products));
     }
-}
-
-function defaultProducts() {
-    return [
-        { id: 1, name: 'Burton Custom', price: 499, category: 'boards', desc: 'Универсальная доска для фрирайда', img: 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400' },
-        { id: 2, name: 'DC Phase BOA', price: 279, category: 'boots', desc: 'Комфортные ботинки с системой BOA', img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400' },
-        { id: 3, name: 'Union Force', price: 199, category: 'bindings', desc: 'Надёжные крепления для фрирайда', img: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400' }
-    ];
+    renderProducts(products);
 }
 
 function renderProducts(items) {
     const grid = document.getElementById('productGrid');
+    if (!grid) return;
+    
+    if (items.length === 0) {
+        grid.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.3);padding:40px 0;">Товары временно отсутствуют</p>';
+        return;
+    }
+    
     grid.innerHTML = items.map(p => `
         <div class="product-card">
-            <img src="${p.img}" class="product-image" alt="${p.name}">
+            <img src="${p.img}" class="product-image" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400'">
             <div class="product-name">${p.name}</div>
             <div class="product-price">$${p.price}</div>
             <div class="product-desc">${p.desc}</div>
-            <button class="add-btn" onclick="addToCart(${p.id})">Добавить в корзину</button>
         </div>
     `).join('');
 }
@@ -49,40 +79,5 @@ document.querySelectorAll('.cat').forEach(btn => {
     });
 });
 
-// Корзина
-function addToCart(id) {
-    const product = products.find(p => p.id === id);
-    const existing = cart.find(item => item.id === id);
-    if (existing) {
-        existing.qty++;
-    } else {
-        cart.push({ ...product, qty: 1 });
-    }
-    document.getElementById('cartCount').textContent = cart.reduce((sum, i) => sum + i.qty, 0);
-}
-
-function toggleCart() {
-    const modal = document.getElementById('cartModal');
-    modal.classList.toggle('active');
-    renderCart();
-}
-
-function closeCart() {
-    document.getElementById('cartModal').classList.remove('active');
-}
-
-function renderCart() {
-    const container = document.getElementById('cartItems');
-    if (cart.length === 0) {
-        container.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center;">Корзина пуста</p>';
-        return;
-    }
-    container.innerHTML = cart.map(item => `
-        <div class="cart-item">
-            <span>${item.name} × ${item.qty}</span>
-            <span>$${item.price * item.qty}</span>
-        </div>
-    `).join('');
-}
-
-loadProducts();
+// Загрузка
+document.addEventListener('DOMContentLoaded', loadProducts);
