@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ-панель</title>
+    <title>Админ-панель SnowShop</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .admin-panel {
@@ -15,19 +15,30 @@
             border-radius: 32px;
             border: 0.5px solid rgba(255,255,255,0.1);
         }
-        .admin-panel input, .admin-panel textarea, .admin-panel select {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0 16px;
-            border-radius: 16px;
-            border: 0.5px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05);
-            color: #fff;
-            font-size: 16px;
-            backdrop-filter: blur(10px);
+        .admin-panel h2 {
+            margin-bottom: 24px;
+            font-weight: 600;
         }
-        .admin-panel button {
-            padding: 14px 30px;
+        .admin-input {
+            width: 100%;
+            padding: 14px 16px;
+            margin: 6px 0 14px;
+            border-radius: 16px;
+            border: 0.5px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            font-size: 15px;
+        }
+        .admin-input:focus {
+            outline: none;
+            border-color: rgba(0, 122, 255, 0.4);
+        }
+        .admin-input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+        .admin-btn {
+            width: 100%;
+            padding: 14px;
             border-radius: 30px;
             border: none;
             background: #007aff;
@@ -36,24 +47,64 @@
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
+            margin-top: 6px;
         }
-        .admin-panel button:hover {
+        .admin-btn:hover {
             opacity: 0.8;
-            transform: scale(1.02);
         }
         .admin-list {
-            margin-top: 30px;
+            margin-top: 24px;
+            border-top: 0.5px solid rgba(255,255,255,0.04);
+            padding-top: 16px;
         }
         .admin-item {
             display: flex;
             justify-content: space-between;
-            padding: 12px;
-            border-bottom: 0.5px solid rgba(255,255,255,0.05);
+            align-items: center;
+            padding: 12px 4px;
+            border-bottom: 0.5px solid rgba(255,255,255,0.03);
+        }
+        .admin-item span {
+            color: rgba(255,255,255,0.8);
         }
         .admin-item button {
-            background: #ff3b30;
+            background: rgba(255, 59, 48, 0.15);
+            border: none;
+            color: #ff3b30;
             padding: 6px 14px;
+            border-radius: 20px;
             font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+        .admin-item button:hover {
+            background: rgba(255, 59, 48, 0.25);
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link:hover {
+            color: rgba(255,255,255,0.7);
+        }
+        .password-input {
+            margin-bottom: 16px;
+        }
+        .login-form {
+            display: none;
+        }
+        .login-form.active {
+            display: block;
+        }
+        .admin-content {
+            display: none;
+        }
+        .admin-content.active {
+            display: block;
         }
     </style>
 </head>
@@ -67,25 +118,128 @@
 
     <div class="container">
         <div class="admin-panel">
-            <h2 style="margin-bottom:20px;">⚙️ Управление товарами</h2>
-            
-            <input type="text" id="productName" placeholder="Название">
-            <input type="number" id="productPrice" placeholder="Цена">
-            <select id="productCategory">
-                <option value="boards">Доски</option>
-                <option value="boots">Ботинки</option>
-                <option value="bindings">Крепления</option>
-            </select>
-            <input type="text" id="productImg" placeholder="URL изображения">
-            <textarea id="productDesc" placeholder="Описание" rows="3"></textarea>
-            
-            <button onclick="addProduct()">➕ Добавить товар</button>
+            <!-- Форма входа -->
+            <div id="loginForm" class="login-form active">
+                <h2>🔐 Вход в админ-панель</h2>
+                <input type="password" id="adminPassword" placeholder="Введите пароль" class="admin-input password-input">
+                <button onclick="checkPassword()" class="admin-btn">Войти</button>
+            </div>
 
-            <div class="admin-list" id="adminProductList"></div>
-            <button onclick="location.href='index.html'" style="margin-top:20px;background:rgba(255,255,255,0.1);">← Назад в магазин</button>
+            <!-- Панель управления -->
+            <div id="adminContent" class="admin-content">
+                <h2>⚙️ Управление товарами</h2>
+                
+                <input type="text" id="productName" placeholder="Название" class="admin-input">
+                <input type="number" id="productPrice" placeholder="Цена" class="admin-input">
+                <select id="productCategory" class="admin-input">
+                    <option value="boards">Доски</option>
+                    <option value="boots">Ботинки</option>
+                    <option value="bindings">Крепления</option>
+                </select>
+                <input type="text" id="productImg" placeholder="URL изображения" class="admin-input">
+                <textarea id="productDesc" placeholder="Описание" rows="3" class="admin-input"></textarea>
+                
+                <button onclick="addProduct()" class="admin-btn">➕ Добавить товар</button>
+
+                <div class="admin-list" id="adminProductList"></div>
+                
+                <a href="index.html" class="back-link">← Вернуться в магазин</a>
+            </div>
         </div>
     </div>
 
-    <script src="admin.js"></script>
+    <script>
+        const ADMIN_PASSWORD = 'snow2026';
+
+        let products = [];
+
+        function checkPassword() {
+            const pass = document.getElementById('adminPassword').value;
+            if (pass === ADMIN_PASSWORD) {
+                document.getElementById('loginForm').classList.remove('active');
+                document.getElementById('adminContent').classList.add('active');
+                loadAdminProducts();
+            } else {
+                alert('❌ Неверный пароль!');
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        function loadAdminProducts() {
+            const stored = localStorage.getItem('shopProducts');
+            if (stored) {
+                products = JSON.parse(stored);
+            } else {
+                products = [];
+            }
+            renderAdminList();
+        }
+
+        function addProduct() {
+            const name = document.getElementById('productName').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const category = document.getElementById('productCategory').value;
+            const img = document.getElementById('productImg').value.trim();
+            const desc = document.getElementById('productDesc').value.trim();
+
+            if (!name || !price || isNaN(price)) {
+                alert('❌ Заполните название и цену!');
+                return;
+            }
+
+            const newProduct = {
+                id: Date.now(),
+                name: name,
+                price: price,
+                category: category,
+                img: img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400',
+                desc: desc || 'Без описания'
+            };
+
+            products.push(newProduct);
+            localStorage.setItem('shopProducts', JSON.stringify(products));
+            
+            renderAdminList();
+            clearForm();
+            
+            alert('✅ Товар добавлен!');
+        }
+
+        function deleteProduct(id) {
+            if (!confirm('Удалить товар?')) return;
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('shopProducts', JSON.stringify(products));
+            renderAdminList();
+        }
+
+        function renderAdminList() {
+            const list = document.getElementById('adminProductList');
+            if (!list) return;
+            
+            if (products.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.3);text-align:center;padding:20px 0;">Товаров пока нет</p>';
+                return;
+            }
+            
+            list.innerHTML = products.map(p => `
+                <div class="admin-item">
+                    <span>${p.name} — $${p.price}</span>
+                    <button onclick="deleteProduct(${p.id})">Удалить</button>
+                </div>
+            `).join('');
+        }
+
+        function clearForm() {
+            document.getElementById('productName').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productImg').value = '';
+            document.getElementById('productDesc').value = '';
+        }
+
+        // При загрузке страницы показываем форму входа
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loginForm').classList.add('active');
+        });
+    </script>
 </body>
 </html>
