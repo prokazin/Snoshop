@@ -261,7 +261,6 @@
             100% { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
         
-        /* Загрузка изображений */
         .image-upload-area {
             border: 2px dashed rgba(255,255,255,0.1);
             border-radius: 16px;
@@ -327,14 +326,12 @@
             align-items: center;
             justify-content: center;
         }
-
         .spec-label {
             font-size: 12px;
             color: rgba(255,255,255,0.3);
             display: block;
             margin-bottom: 4px;
         }
-
         @media (max-width: 640px) {
             .admin-panel {
                 padding: 20px;
@@ -399,7 +396,6 @@
             <div id="adminContent" class="admin-content">
                 <h2>⚙️ Управление товарами</h2>
                 
-                <!-- Статистика -->
                 <div class="admin-stats" id="stats">
                     <div>
                         <div class="number" id="totalCount">0</div>
@@ -419,7 +415,6 @@
                     </div>
                 </div>
 
-                <!-- Поиск и сортировка -->
                 <div class="admin-search">
                     <input type="text" id="searchInput" placeholder="🔍 Поиск по названию..." class="admin-input" oninput="searchProducts()">
                 </div>
@@ -441,7 +436,6 @@
                         <option value="clothes">Одежда</option>
                     </select>
                     
-                    <!-- Характеристики (текстовые поля) -->
                     <div style="background:rgba(255,255,255,0.03);border-radius:16px;padding:14px;margin:6px 0 14px;border:0.5px solid rgba(255,255,255,0.04);">
                         <div style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">📋 Характеристики (будут видны посетителям)</div>
                         <div class="admin-row-3">
@@ -460,7 +454,6 @@
                         </div>
                     </div>
                     
-                    <!-- Загрузка изображений -->
                     <div class="image-upload-area" id="imageUploadArea" onclick="document.getElementById('imageInput').click()">
                         <span class="icon">📸</span>
                         <div class="text">Нажмите или перетащите фото для загрузки</div>
@@ -483,7 +476,6 @@
                     </div>
                 </div>
 
-                <!-- Список товаров -->
                 <div class="admin-toolbar">
                     <button onclick="sortProducts('name')" class="admin-btn secondary">По имени</button>
                     <button onclick="sortProducts('price')" class="admin-btn secondary">По цене</button>
@@ -525,16 +517,6 @@
             if (stored) {
                 try {
                     products = JSON.parse(stored);
-                    // Убеждаемся, что у каждого товара есть images и specs
-                    products = products.map(p => {
-                        if (!p.images) {
-                            p.images = [p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
-                        }
-                        if (!p.specs) {
-                            p.specs = {};
-                        }
-                        return p;
-                    });
                 } catch (e) {
                     products = [];
                 }
@@ -545,7 +527,6 @@
             updateStats();
         }
 
-        // Загрузка изображений
         function handleImageUpload(event) {
             const files = event.target.files;
             for (const file of files) {
@@ -565,6 +546,7 @@
 
         function renderImagePreviews() {
             const container = document.getElementById('imagePreviewContainer');
+            if (!container) return;
             container.innerHTML = tempImages.map((img, index) => `
                 <div class="image-preview">
                     <img src="${img}" alt="Фото">
@@ -578,30 +560,31 @@
             renderImagePreviews();
         }
 
-        // Drag & Drop
         const uploadArea = document.getElementById('imageUploadArea');
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            for (const file of files) {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(ev) {
-                        tempImages.push(ev.target.result);
-                        renderImagePreviews();
-                    };
-                    reader.readAsDataURL(file);
+        if (uploadArea) {
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                for (const file of files) {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            tempImages.push(ev.target.result);
+                            renderImagePreviews();
+                        };
+                        reader.readAsDataURL(file);
+                    }
                 }
-            }
-        });
+            });
+        }
 
         function renderAdminList() {
             const list = document.getElementById('adminProductList');
@@ -612,17 +595,17 @@
             if (searchQuery) {
                 const q = searchQuery.toLowerCase();
                 filtered = filtered.filter(p => 
-                    p.name.toLowerCase().includes(q) || 
+                    (p.name && p.name.toLowerCase().includes(q)) || 
                     (p.desc && p.desc.toLowerCase().includes(q))
                 );
             }
             
             if (currentSort === 'name') {
-                filtered.sort((a, b) => a.name.localeCompare(b.name));
+                filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
             } else if (currentSort === 'price') {
-                filtered.sort((a, b) => a.price - b.price);
+                filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
             } else if (currentSort === 'category') {
-                filtered.sort((a, b) => a.category.localeCompare(b.category));
+                filtered.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
             }
             
             if (filtered.length === 0) {
@@ -645,9 +628,9 @@
                 return `
                 <div class="admin-item">
                     <div class="admin-item-info">
-                        <span style="font-weight:500;">${p.name}</span>
-                        <span class="price">${p.price.toLocaleString('ru-RU')} ₽</span>
-                        <span class="category-badge">${p.category}</span>
+                        <span style="font-weight:500;">${p.name || 'Без названия'}</span>
+                        <span class="price">${(p.price || 0).toLocaleString('ru-RU')} ₽</span>
+                        <span class="category-badge">${p.category || 'без категории'}</span>
                         <span style="color:${p.inStock !== false ? '#34c759' : '#ff3b30'};font-size:12px;">${p.inStock !== false ? '✓' : '✕'}</span>
                         <span style="font-size:11px;color:rgba(255,255,255,0.2);">📸 ${imagesCount}</span>
                         ${specsDisplay ? `<span style="font-size:11px;color:rgba(255,255,255,0.2);">${specsDisplay}</span>` : ''}
@@ -686,8 +669,12 @@
             if (document.getElementById('isNew').checked) tags.push('новинка');
             if (document.getElementById('isPremium').checked) tags.push('премиум');
 
-            if (!name || !price || isNaN(price) || price <= 0) {
-                showToast('❌ Заполните название и корректную цену!');
+            if (!name) {
+                showToast('❌ Введите название товара!');
+                return;
+            }
+            if (!price || isNaN(price) || price <= 0) {
+                showToast('❌ Введите корректную цену!');
                 return;
             }
 
@@ -699,7 +686,6 @@
             const images = tempImages.length > 0 ? tempImages : ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
 
             if (editId) {
-                // Редактирование
                 const index = products.findIndex(p => p.id === parseInt(editId));
                 if (index !== -1) {
                     products[index] = {
@@ -714,13 +700,15 @@
                         specs: Object.keys(specs).length > 0 ? specs : undefined
                     };
                     showToast('✅ Товар обновлён!');
+                } else {
+                    showToast('❌ Товар не найден!');
+                    return;
                 }
                 document.getElementById('editId').value = '';
                 document.getElementById('formTitle').textContent = '➕ Добавить товар';
                 document.getElementById('submitBtn').textContent = '➕ Добавить';
                 document.getElementById('cancelBtn').style.display = 'none';
             } else {
-                // Добавление
                 const newProduct = {
                     id: Date.now(),
                     name: name,
@@ -737,10 +725,7 @@
                 showToast('✅ Товар добавлен!');
             }
             
-            // Сохраняем в localStorage
             localStorage.setItem('shopProducts', JSON.stringify(products));
-            
-            // Обновляем отображение
             renderAdminList();
             updateStats();
             clearForm();
@@ -751,9 +736,9 @@
             if (!p) return;
             
             document.getElementById('editId').value = p.id;
-            document.getElementById('productName').value = p.name;
-            document.getElementById('productPrice').value = p.price;
-            document.getElementById('productCategory').value = p.category;
+            document.getElementById('productName').value = p.name || '';
+            document.getElementById('productPrice').value = p.price || '';
+            document.getElementById('productCategory').value = p.category || 'boards';
             document.getElementById('productDesc').value = p.desc || '';
             document.getElementById('inStock').checked = p.inStock !== false;
             document.getElementById('isHit').checked = (p.tags || []).includes('хит');
@@ -812,6 +797,7 @@
         }
 
         function clearAllProducts() {
+            if (!confirm('Удалить все товары?')) return;
             products = [];
             localStorage.setItem('shopProducts', JSON.stringify(products));
             renderAdminList();
@@ -858,7 +844,7 @@
                     } else {
                         showToast('❌ Неверный формат файла');
                     }
-                } catch {
+                } catch (err) {
                     showToast('❌ Ошибка чтения файла');
                 }
             };
