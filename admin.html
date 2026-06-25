@@ -412,16 +412,28 @@
                 <div style="background:rgba(255,255,255,0.02);padding:16px;border-radius:16px;margin-bottom:16px;">
                     <h3 id="formTitle" style="font-size:16px;font-weight:500;margin-bottom:12px;">➕ Добавить товар</h3>
                     <input type="hidden" id="editId">
+                    
                     <div class="admin-row">
                         <input type="text" id="productName" placeholder="Название" class="admin-input">
                         <input type="number" id="productPrice" placeholder="Цена" class="admin-input">
                     </div>
+                    
                     <select id="productCategory" class="admin-input">
                         <option value="boards">Доски</option>
                         <option value="boots">Ботинки</option>
                         <option value="bindings">Крепления</option>
                         <option value="clothes">Одежда</option>
                     </select>
+                    
+                    <!-- Характеристики (текстовые поля) -->
+                    <div style="background:rgba(255,255,255,0.03);border-radius:16px;padding:14px;margin:6px 0 14px;border:0.5px solid rgba(255,255,255,0.04);">
+                        <div style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">📋 Характеристики</div>
+                        <div class="admin-row">
+                            <input type="text" id="productFlex" placeholder="Жёсткость (например: средняя, 5/10)" class="admin-input" style="margin:0;">
+                            <input type="text" id="productSize" placeholder="Размер (например: 158, M, 42)" class="admin-input" style="margin:0;">
+                            <input type="text" id="productColor" placeholder="Цвет (например: синий, чёрный)" class="admin-input" style="margin:0;">
+                        </div>
+                    </div>
                     
                     <!-- Загрузка изображений -->
                     <div class="image-upload-area" id="imageUploadArea" onclick="document.getElementById('imageInput').click()">
@@ -589,6 +601,15 @@
                 const tags = p.tags || [];
                 const tagsStr = tags.map(t => `<span style="background:rgba(255,255,255,0.04);padding:2px 8px;border-radius:8px;font-size:11px;color:rgba(255,255,255,0.4);">${t}</span>`).join(' ');
                 const imagesCount = p.images ? p.images.length : 0;
+                
+                // Характеристики для отображения
+                const specs = p.specs || {};
+                const specsStr = [];
+                if (specs.flex) specsStr.push(`💪${specs.flex}`);
+                if (specs.size) specsStr.push(`📏${specs.size}`);
+                if (specs.color) specsStr.push(`🎨${specs.color}`);
+                const specsDisplay = specsStr.length > 0 ? specsStr.join(' · ') : '';
+                
                 return `
                 <div class="admin-item">
                     <div class="admin-item-info">
@@ -597,6 +618,7 @@
                         <span class="category-badge">${p.category}</span>
                         <span style="color:${p.inStock !== false ? '#34c759' : '#ff3b30'};font-size:12px;">${p.inStock !== false ? '✓' : '✕'}</span>
                         <span style="font-size:11px;color:rgba(255,255,255,0.2);">📸 ${imagesCount}</span>
+                        ${specsDisplay ? `<span style="font-size:11px;color:rgba(255,255,255,0.2);">${specsDisplay}</span>` : ''}
                         <span style="font-size:12px;color:rgba(255,255,255,0.3);">${tagsStr}</span>
                     </div>
                     <div class="admin-item-actions">
@@ -623,6 +645,11 @@
             const desc = document.getElementById('productDesc').value.trim();
             const inStock = document.getElementById('inStock').checked;
             
+            // Текстовые поля
+            const flex = document.getElementById('productFlex').value.trim();
+            const size = document.getElementById('productSize').value.trim();
+            const color = document.getElementById('productColor').value.trim();
+            
             const tags = [];
             if (document.getElementById('isHit').checked) tags.push('хит');
             if (document.getElementById('isNew').checked) tags.push('новинка');
@@ -633,7 +660,12 @@
                 return;
             }
 
-            // Используем загруженные изображения или дефолтное
+            // Характеристики (только если что-то вписано)
+            const specs = {};
+            if (flex) specs.flex = flex;
+            if (size) specs.size = size;
+            if (color) specs.color = color;
+
             const images = tempImages.length > 0 ? tempImages : ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
 
             if (editId) {
@@ -647,7 +679,8 @@
                         desc: desc || 'Без описания',
                         inStock,
                         tags,
-                        images: images
+                        images,
+                        specs: Object.keys(specs).length > 0 ? specs : undefined
                     };
                     showToast('✅ Товар обновлён!');
                 }
@@ -665,6 +698,7 @@
                     inStock: inStock,
                     tags: tags,
                     images: images,
+                    specs: Object.keys(specs).length > 0 ? specs : undefined,
                     rating: 0
                 };
                 products.push(newProduct);
@@ -691,7 +725,12 @@
             document.getElementById('isNew').checked = (p.tags || []).includes('новинка');
             document.getElementById('isPremium').checked = (p.tags || []).includes('премиум');
             
-            // Загружаем существующие изображения
+            // Загружаем характеристики
+            const specs = p.specs || {};
+            document.getElementById('productFlex').value = specs.flex || '';
+            document.getElementById('productSize').value = specs.size || '';
+            document.getElementById('productColor').value = specs.color || '';
+            
             tempImages = p.images ? [...p.images] : [];
             renderImagePreviews();
             
@@ -719,7 +758,8 @@
                 id: Date.now(),
                 name: p.name + ' (копия)',
                 tags: [...(p.tags || [])],
-                images: [...(p.images || [])]
+                images: [...(p.images || [])],
+                specs: p.specs ? { ...p.specs } : undefined
             };
             products.push(copy);
             localStorage.setItem('shopProducts', JSON.stringify(products));
@@ -800,6 +840,12 @@
             document.getElementById('isHit').checked = false;
             document.getElementById('isNew').checked = false;
             document.getElementById('isPremium').checked = false;
+            
+            // Очищаем текстовые поля
+            document.getElementById('productFlex').value = '';
+            document.getElementById('productSize').value = '';
+            document.getElementById('productColor').value = '';
+            
             tempImages = [];
             renderImagePreviews();
         }
