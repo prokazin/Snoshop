@@ -13,7 +13,6 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Фоновое видео */
 .video-bg {
     position: fixed;
     top: 0;
@@ -40,7 +39,6 @@ body {
     backdrop-filter: blur(3px);
 }
 
-/* Контейнер */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -49,7 +47,6 @@ body {
     z-index: 1;
 }
 
-/* Хедер */
 .header {
     padding: 40px 20px 30px;
     text-align: center;
@@ -80,7 +77,6 @@ body {
     text-transform: uppercase;
 }
 
-/* Категории */
 .categories {
     display: flex;
     gap: 10px;
@@ -122,7 +118,6 @@ body {
     transform: scale(0.95);
 }
 
-/* Сетка товаров */
 .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -130,7 +125,6 @@ body {
     padding: 5px 0;
 }
 
-/* Анимация появления карточек */
 .product-card {
     background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(30px);
@@ -175,7 +169,6 @@ body {
     }
 }
 
-/* Скелетон загрузки */
 .skeleton {
     background: rgba(255, 255, 255, 0.04);
     border-radius: 24px;
@@ -237,7 +230,6 @@ body {
     line-height: 1.5;
 }
 
-/* Модальное окно товара */
 .product-modal {
     display: none;
     position: fixed;
@@ -403,7 +395,6 @@ body {
     border: 0.5px solid rgba(0, 122, 255, 0.1);
 }
 
-/* Характеристики на сайте */
 .modal-specs {
     display: flex;
     gap: 8px;
@@ -466,7 +457,6 @@ body {
     margin-top: 4px;
 }
 
-/* Адаптив */
 @media (max-width: 768px) {
     .container {
         padding: 12px 12px 30px;
