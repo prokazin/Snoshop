@@ -387,7 +387,6 @@
             background: rgba(52, 199, 89, 0.25);
         }
 
-        /* Категории в админке */
         .categories-admin {
             display: flex;
             flex-wrap: wrap;
@@ -610,7 +609,6 @@
         let searchQuery = '';
         let currentSort = '';
         let tempImages = [];
-        let specRows = [];
 
         // ===== УПРАВЛЕНИЕ КАТЕГОРИЯМИ =====
         function loadCategories() {
@@ -627,6 +625,8 @@
             }
             renderCategoriesAdmin();
             renderCategorySelect();
+            // Отправляем событие для синхронизации с сайтом
+            notifySite();
         }
 
         function renderCategoriesAdmin() {
@@ -650,7 +650,7 @@
             const select = document.getElementById('productCategory');
             if (!select) return;
             
-            const currentValue = select.value || 'boards';
+            const currentValue = select.value || (categories.length > 0 ? categories[0] : '');
             select.innerHTML = categories.map(cat => `
                 <option value="${cat}">${cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
             `).join('');
@@ -682,8 +682,6 @@
             input.value = '';
             renderCategoriesAdmin();
             renderCategorySelect();
-            
-            // Обновляем категории на сайте через storage событие
             notifySite();
             
             showToast('✅ Категория добавлена!');
@@ -713,6 +711,12 @@
             // Отправляем событие для синхронизации с сайтом
             localStorage.setItem('shopCategories', JSON.stringify(categories));
             // Принудительно вызываем событие storage
+            if (window.parent) {
+                try {
+                    window.parent.postMessage({ type: 'categoriesUpdated', categories: categories }, '*');
+                } catch(e) {}
+            }
+            // Также вызываем событие на текущей вкладке
             const event = new StorageEvent('storage', {
                 key: 'shopCategories',
                 newValue: JSON.stringify(categories)
@@ -725,10 +729,8 @@
             const container = document.getElementById('specsContainer');
             if (!container) return;
             
-            const rowId = Date.now() + Math.random();
             const row = document.createElement('div');
             row.className = 'spec-row';
-            row.dataset.id = rowId;
             row.innerHTML = `
                 <input type="text" class="admin-input spec-key" placeholder="Название (например: Жёсткость)" value="${key}" style="margin:0;">
                 <input type="text" class="admin-input spec-value" placeholder="Значение (например: 5/10)" value="${value}" style="margin:0;">
@@ -1133,7 +1135,6 @@
             document.getElementById('isNew').checked = false;
             document.getElementById('isPremium').checked = false;
             
-            // Очищаем характеристики
             const container = document.getElementById('specsContainer');
             container.innerHTML = '';
             addSpecRow('', '');
@@ -1158,9 +1159,26 @@
             }, 2500);
         }
 
+        // Синхронизация между вкладками
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'shopCategories') {
+                try {
+                    categories = JSON.parse(e.newValue);
+                    renderCategoriesAdmin();
+                    renderCategorySelect();
+                } catch (e) {}
+            }
+            if (e.key === 'shopProducts') {
+                try {
+                    products = JSON.parse(e.newValue);
+                    renderAdminList();
+                    updateStats();
+                } catch (e) {}
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('loginForm').classList.add('active');
-            // Инициализируем одну строку характеристик
             addSpecRow('', '');
         });
     </script>
