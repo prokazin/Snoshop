@@ -43,11 +43,6 @@
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
-        .admin-row-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
         .admin-btn {
             width: 100%;
             padding: 14px;
@@ -73,6 +68,18 @@
         }
         .admin-btn.secondary:hover {
             background: rgba(255,255,255,0.15);
+        }
+        .admin-btn.small {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-top: 0;
+        }
+        .admin-btn.green {
+            background: #34c759;
+        }
+        .admin-btn.green:hover {
+            opacity: 0.8;
         }
         .admin-toolbar {
             display: flex;
@@ -332,20 +339,103 @@
             display: block;
             margin-bottom: 4px;
         }
-        .specs-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin: 6px 0 14px;
-        }
-        .specs-grid .spec-pair {
+        .specs-container {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 8px;
+            margin: 6px 0 14px;
         }
-        .specs-grid .spec-pair input {
+        .spec-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 30px;
+            gap: 10px;
+            align-items: center;
+        }
+        .spec-row input {
             margin: 0;
         }
+        .spec-row .remove-spec {
+            background: rgba(255, 59, 48, 0.15);
+            border: none;
+            color: #ff3b30;
+            width: 30px;
+            height: 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+        .spec-row .remove-spec:hover {
+            background: rgba(255, 59, 48, 0.25);
+        }
+        .add-spec-btn {
+            background: rgba(52, 199, 89, 0.15);
+            border: none;
+            color: #34c759;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: fit-content;
+            font-weight: 500;
+        }
+        .add-spec-btn:hover {
+            background: rgba(52, 199, 89, 0.25);
+        }
+
+        /* Категории в админке */
+        .categories-admin {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0 16px;
+            padding: 12px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 16px;
+            border: 0.5px solid rgba(255,255,255,0.04);
+        }
+        .category-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.04);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            border: 0.5px solid rgba(255,255,255,0.04);
+        }
+        .category-tag .remove-cat {
+            background: none;
+            border: none;
+            color: #ff3b30;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 4px;
+        }
+        .category-tag .remove-cat:hover {
+            opacity: 0.7;
+        }
+        .add-category-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .add-category-row input {
+            flex: 1;
+            margin: 0;
+        }
+        .add-category-row .admin-btn {
+            width: auto;
+            margin: 0;
+            padding: 10px 20px;
+        }
+
         @media (max-width: 640px) {
             .admin-panel {
                 padding: 20px;
@@ -356,13 +446,8 @@
                 grid-template-columns: 1fr;
                 gap: 0;
             }
-            .admin-row-2 {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-            .specs-grid {
-                grid-template-columns: 1fr;
-                gap: 0;
+            .spec-row {
+                grid-template-columns: 1fr 1fr 30px;
             }
             .admin-toolbar .admin-btn {
                 width: 100%;
@@ -389,6 +474,12 @@
             .image-preview {
                 width: 60px;
                 height: 60px;
+            }
+            .add-category-row {
+                flex-direction: column;
+            }
+            .add-category-row .admin-btn {
+                width: 100%;
             }
         }
     </style>
@@ -433,11 +524,21 @@
                     </div>
                 </div>
 
+                <!-- Управление категориями -->
+                <div style="background:rgba(255,255,255,0.02);padding:16px;border-radius:16px;margin-bottom:16px;">
+                    <h3 style="font-size:16px;font-weight:500;margin-bottom:10px;">📂 Управление категориями</h3>
+                    <div class="categories-admin" id="categoriesAdminList"></div>
+                    <div class="add-category-row">
+                        <input type="text" id="newCategoryInput" placeholder="Название новой категории" class="admin-input">
+                        <button onclick="addCategory()" class="admin-btn green small">➕ Добавить</button>
+                    </div>
+                </div>
+
                 <div class="admin-search">
                     <input type="text" id="searchInput" placeholder="🔍 Поиск по названию..." class="admin-input" oninput="searchProducts()">
                 </div>
 
-                <!-- Форма добавления/редактирования -->
+                <!-- Форма добавления/редактирования товара -->
                 <div style="background:rgba(255,255,255,0.02);padding:16px;border-radius:16px;margin-bottom:16px;">
                     <h3 id="formTitle" style="font-size:16px;font-weight:500;margin-bottom:12px;">➕ Добавить товар</h3>
                     <input type="hidden" id="editId">
@@ -448,58 +549,19 @@
                     </div>
                     
                     <select id="productCategory" class="admin-input">
-                        <option value="boards">Доски</option>
-                        <option value="boots">Ботинки</option>
-                        <option value="bindings">Крепления</option>
-                        <option value="clothes">Одежда</option>
+                        <!-- Категории будут загружены из localStorage -->
                     </select>
                     
-                    <!-- 10 полей для характеристик -->
+                    <!-- Динамические характеристики -->
                     <div style="background:rgba(255,255,255,0.03);border-radius:16px;padding:14px;margin:6px 0 14px;border:0.5px solid rgba(255,255,255,0.04);">
-                        <div style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">📋 Характеристики (заполните нужные, остальные оставьте пустыми)</div>
-                        <div class="specs-grid">
-                            <div class="spec-pair">
-                                <label class="spec-label">Характеристика 1</label>
-                                <input type="text" id="spec1" placeholder="Название: значение" class="admin-input">
-                            </div>
-                            <div class="spec-pair">
-                                <label class="spec-label">Характеристика 2</label>
-                                <input type="text" id="spec2" placeholder="Название: значение" class="admin-input">
-                            </div>
-                            <div class="spec-pair">
-                                <label class="spec-label">Характеристика 3</label>
-                                <input type="text" id="spec3" placeholder="Название: значение" class="admin-input">
-                            </div>
-                            <div class="spec-pair">
-                                <label class="spec-label">Характеристика 4</label>
-                                <input type="text" id="spec4" placeholder="Название: значение" class="admin-input">
-                            </div>
-                            <div class="spec-pair">
-                                <label class="spec-label">Характеристика 5</label>
-                                <input type="text" id="spec5" placeholder="Название: значение" class="admin-input">
-                            </div>
-                            <div class="spec-pair">
-                                <label class="spec-label">Характеристика 6</label>
-                                <input type="text" id="spec6" placeholder="Название: значение" class="admin-input">
-                            </div>
-                            <div class="spec-pair">
-                                <label class="spec-label">Характеристика 7</label>
-                                <input type="text" id="spec7" placeholder="Название: значение" class="admin-input">
-                            </div>
-                            <div class="spec-pair">
-                                <label class="spec-label">Характеристика 8</label>
-                                <input type="text" id="spec8" placeholder="Название: значение" class="admin-input">
-                            </div>
-                            <div class="spec-pair">
-                                <label class="spec-label">Характеристика 9</label>
-                                <input type="text" id="spec9" placeholder="Название: значение" class="admin-input">
-                            </div>
-                            <div class="spec-pair">
-                                <label class="spec-label">Характеристика 10</label>
-                                <input type="text" id="spec10" placeholder="Название: значение" class="admin-input">
-                            </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                            <div style="font-size:13px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.5px;">📋 Характеристики</div>
+                            <button onclick="addSpecRow()" class="add-spec-btn">➕ Добавить характеристику</button>
                         </div>
-                        <div style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:6px;">Формат: <strong>Название: значение</strong> (например: Жёсткость: 5/10)</div>
+                        <div class="specs-container" id="specsContainer">
+                            <!-- Строки характеристик добавляются сюда -->
+                        </div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:6px;">Формат: <strong>Название</strong> и <strong>Значение</strong></div>
                     </div>
                     
                     <div class="image-upload-area" id="imageUploadArea" onclick="document.getElementById('imageInput').click()">
@@ -544,16 +606,189 @@
     <script>
         const ADMIN_PASSWORD = 'snow2026';
         let products = [];
+        let categories = [];
         let searchQuery = '';
         let currentSort = '';
         let tempImages = [];
+        let specRows = [];
 
+        // ===== УПРАВЛЕНИЕ КАТЕГОРИЯМИ =====
+        function loadCategories() {
+            const stored = localStorage.getItem('shopCategories');
+            if (stored) {
+                try {
+                    categories = JSON.parse(stored);
+                } catch (e) {
+                    categories = ['boards', 'boots', 'bindings', 'clothes'];
+                }
+            } else {
+                categories = ['boards', 'boots', 'bindings', 'clothes'];
+                localStorage.setItem('shopCategories', JSON.stringify(categories));
+            }
+            renderCategoriesAdmin();
+            renderCategorySelect();
+        }
+
+        function renderCategoriesAdmin() {
+            const container = document.getElementById('categoriesAdminList');
+            if (!container) return;
+            
+            if (categories.length === 0) {
+                container.innerHTML = '<span style="color:rgba(255,255,255,0.2);font-size:14px;">Нет категорий</span>';
+                return;
+            }
+            
+            container.innerHTML = categories.map(cat => `
+                <span class="category-tag">
+                    ${cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    <button class="remove-cat" onclick="deleteCategory('${cat}')" title="Удалить категорию">✕</button>
+                </span>
+            `).join('');
+        }
+
+        function renderCategorySelect() {
+            const select = document.getElementById('productCategory');
+            if (!select) return;
+            
+            const currentValue = select.value || 'boards';
+            select.innerHTML = categories.map(cat => `
+                <option value="${cat}">${cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+            `).join('');
+            
+            if (categories.includes(currentValue)) {
+                select.value = currentValue;
+            } else if (categories.length > 0) {
+                select.value = categories[0];
+            }
+        }
+
+        function addCategory() {
+            const input = document.getElementById('newCategoryInput');
+            const name = input.value.trim().toLowerCase();
+            
+            if (!name) {
+                showToast('❌ Введите название категории!');
+                return;
+            }
+            
+            if (categories.includes(name)) {
+                showToast('❌ Такая категория уже существует!');
+                return;
+            }
+            
+            categories.push(name);
+            localStorage.setItem('shopCategories', JSON.stringify(categories));
+            
+            input.value = '';
+            renderCategoriesAdmin();
+            renderCategorySelect();
+            
+            // Обновляем категории на сайте через storage событие
+            notifySite();
+            
+            showToast('✅ Категория добавлена!');
+        }
+
+        function deleteCategory(cat) {
+            // Проверяем, есть ли товары в этой категории
+            const hasProducts = products.some(p => p.category === cat);
+            if (hasProducts) {
+                showToast('❌ Нельзя удалить категорию с товарами!');
+                return;
+            }
+            
+            if (!confirm(`Удалить категорию "${cat}"?`)) return;
+            
+            categories = categories.filter(c => c !== cat);
+            localStorage.setItem('shopCategories', JSON.stringify(categories));
+            
+            renderCategoriesAdmin();
+            renderCategorySelect();
+            notifySite();
+            
+            showToast('🗑️ Категория удалена');
+        }
+
+        function notifySite() {
+            // Отправляем событие для синхронизации с сайтом
+            localStorage.setItem('shopCategories', JSON.stringify(categories));
+            // Принудительно вызываем событие storage
+            const event = new StorageEvent('storage', {
+                key: 'shopCategories',
+                newValue: JSON.stringify(categories)
+            });
+            window.dispatchEvent(event);
+        }
+
+        // ===== ХАРАКТЕРИСТИКИ =====
+        function addSpecRow(key = '', value = '') {
+            const container = document.getElementById('specsContainer');
+            if (!container) return;
+            
+            const rowId = Date.now() + Math.random();
+            const row = document.createElement('div');
+            row.className = 'spec-row';
+            row.dataset.id = rowId;
+            row.innerHTML = `
+                <input type="text" class="admin-input spec-key" placeholder="Название (например: Жёсткость)" value="${key}" style="margin:0;">
+                <input type="text" class="admin-input spec-value" placeholder="Значение (например: 5/10)" value="${value}" style="margin:0;">
+                <button class="remove-spec" onclick="removeSpecRow(this)" title="Удалить характеристику">✕</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeSpecRow(btn) {
+            const row = btn.closest('.spec-row');
+            if (row) {
+                const container = document.getElementById('specsContainer');
+                if (container.children.length <= 1) {
+                    showToast('❌ Должна быть хотя бы одна характеристика');
+                    return;
+                }
+                row.remove();
+            }
+        }
+
+        function getSpecsFromRows() {
+            const rows = document.querySelectorAll('.spec-row');
+            const specs = {};
+            for (const row of rows) {
+                const keyInput = row.querySelector('.spec-key');
+                const valueInput = row.querySelector('.spec-value');
+                if (keyInput && valueInput) {
+                    const key = keyInput.value.trim();
+                    const value = valueInput.value.trim();
+                    if (key && value) {
+                        specs[key] = value;
+                    }
+                }
+            }
+            return specs;
+        }
+
+        function setSpecsToRows(specs) {
+            const container = document.getElementById('specsContainer');
+            container.innerHTML = '';
+            
+            const keys = Object.keys(specs);
+            if (keys.length === 0) {
+                addSpecRow('', '');
+                return;
+            }
+            
+            for (const key of keys) {
+                addSpecRow(key, specs[key]);
+            }
+        }
+
+        // ===== ВХОД И ЗАГРУЗКА =====
         function checkPassword() {
             const pass = document.getElementById('adminPassword').value;
             if (pass === ADMIN_PASSWORD) {
                 document.getElementById('loginForm').classList.remove('active');
                 document.getElementById('adminContent').classList.add('active');
                 loadAdminProducts();
+                loadCategories();
             } else {
                 showToast('❌ Неверный пароль!');
                 document.getElementById('adminPassword').value = '';
@@ -575,6 +810,7 @@
             updateStats();
         }
 
+        // ===== ЗАГРУЗКА ИЗОБРАЖЕНИЙ =====
         function handleImageUpload(event) {
             const files = event.target.files;
             for (const file of files) {
@@ -634,6 +870,7 @@
             });
         }
 
+        // ===== ОТОБРАЖЕНИЕ СПИСКА =====
         function renderAdminList() {
             const list = document.getElementById('adminProductList');
             if (!list) return;
@@ -697,71 +934,7 @@
             document.getElementById('bindingsCount').textContent = products.filter(p => p.category === 'bindings').length;
         }
 
-        function parseSpec(value) {
-            if (!value || !value.includes(':')) return null;
-            const parts = value.split(':');
-            const key = parts[0].trim();
-            const val = parts.slice(1).join(':').trim();
-            if (key && val) {
-                return { key, value: val };
-            }
-            return null;
-        }
-
-        function getSpecs() {
-            const specs = {};
-            const specInputs = [
-                document.getElementById('spec1'),
-                document.getElementById('spec2'),
-                document.getElementById('spec3'),
-                document.getElementById('spec4'),
-                document.getElementById('spec5'),
-                document.getElementById('spec6'),
-                document.getElementById('spec7'),
-                document.getElementById('spec8'),
-                document.getElementById('spec9'),
-                document.getElementById('spec10')
-            ];
-            
-            for (const input of specInputs) {
-                if (!input) continue;
-                const parsed = parseSpec(input.value);
-                if (parsed) {
-                    specs[parsed.key] = parsed.value;
-                }
-            }
-            return specs;
-        }
-
-        function setSpecs(specs) {
-            const specInputs = [
-                document.getElementById('spec1'),
-                document.getElementById('spec2'),
-                document.getElementById('spec3'),
-                document.getElementById('spec4'),
-                document.getElementById('spec5'),
-                document.getElementById('spec6'),
-                document.getElementById('spec7'),
-                document.getElementById('spec8'),
-                document.getElementById('spec9'),
-                document.getElementById('spec10')
-            ];
-            
-            if (!specs || Object.keys(specs).length === 0) {
-                for (const input of specInputs) {
-                    if (input) input.value = '';
-                }
-                return;
-            }
-            
-            const keys = Object.keys(specs);
-            for (let i = 0; i < specInputs.length && i < keys.length; i++) {
-                if (specInputs[i]) {
-                    specInputs[i].value = keys[i] + ': ' + specs[keys[i]];
-                }
-            }
-        }
-
+        // ===== ДОБАВЛЕНИЕ/РЕДАКТИРОВАНИЕ ТОВАРА =====
         function addProduct() {
             const editId = document.getElementById('editId').value;
             const name = document.getElementById('productName').value.trim();
@@ -784,7 +957,7 @@
                 return;
             }
 
-            const specs = getSpecs();
+            const specs = getSpecsFromRows();
             const images = tempImages.length > 0 ? tempImages : ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
 
             if (editId) {
@@ -847,7 +1020,7 @@
             document.getElementById('isNew').checked = (p.tags || []).includes('новинка');
             document.getElementById('isPremium').checked = (p.tags || []).includes('премиум');
             
-            setSpecs(p.specs || {});
+            setSpecsToRows(p.specs || {});
             
             tempImages = p.images ? [...p.images] : [];
             renderImagePreviews();
@@ -960,13 +1133,10 @@
             document.getElementById('isNew').checked = false;
             document.getElementById('isPremium').checked = false;
             
-            const specInputs = [
-                'spec1', 'spec2', 'spec3', 'spec4', 'spec5',
-                'spec6', 'spec7', 'spec8', 'spec9', 'spec10'
-            ];
-            for (const id of specInputs) {
-                document.getElementById(id).value = '';
-            }
+            // Очищаем характеристики
+            const container = document.getElementById('specsContainer');
+            container.innerHTML = '';
+            addSpecRow('', '');
             
             tempImages = [];
             renderImagePreviews();
@@ -990,6 +1160,8 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('loginForm').classList.add('active');
+            // Инициализируем одну строку характеристик
+            addSpecRow('', '');
         });
     </script>
 </body>
