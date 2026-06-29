@@ -625,7 +625,6 @@
             }
             renderCategoriesAdmin();
             renderCategorySelect();
-            // Отправляем событие для синхронизации с сайтом
             notifySite();
         }
 
@@ -688,7 +687,6 @@
         }
 
         function deleteCategory(cat) {
-            // Проверяем, есть ли товары в этой категории
             const hasProducts = products.some(p => p.category === cat);
             if (hasProducts) {
                 showToast('❌ Нельзя удалить категорию с товарами!');
@@ -708,15 +706,7 @@
         }
 
         function notifySite() {
-            // Отправляем событие для синхронизации с сайтом
             localStorage.setItem('shopCategories', JSON.stringify(categories));
-            // Принудительно вызываем событие storage
-            if (window.parent) {
-                try {
-                    window.parent.postMessage({ type: 'categoriesUpdated', categories: categories }, '*');
-                } catch(e) {}
-            }
-            // Также вызываем событие на текущей вкладке
             const event = new StorageEvent('storage', {
                 key: 'shopCategories',
                 newValue: JSON.stringify(categories)
@@ -1159,7 +1149,6 @@
             }, 2500);
         }
 
-        // Синхронизация между вкладками
         window.addEventListener('storage', (e) => {
             if (e.key === 'shopCategories') {
                 try {
