@@ -82,8 +82,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
-    margin-top: 16px;
+    gap: 16px;
+    margin-top: 18px;
     flex-wrap: wrap;
 }
 
@@ -91,7 +91,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
+    padding: 8px 18px;
     border-radius: 30px;
     background: rgba(255, 255, 255, 0.04);
     border: 0.5px solid rgba(255, 255, 255, 0.06);
@@ -104,10 +104,11 @@ body {
     opacity: 0.6;
 }
 
-.contact-link svg {
+.contact-link .contact-icon {
     width: 20px;
     height: 20px;
     flex-shrink: 0;
+    stroke: rgba(255, 255, 255, 0.5);
 }
 
 .contact-link.disabled {
@@ -133,29 +134,23 @@ body {
     transform: translateY(-2px);
 }
 
-.contact-link:not(.disabled) .phone {
-    color: #34c759;
+.contact-link:not(.disabled) .contact-icon {
+    stroke: rgba(255, 255, 255, 0.7);
 }
 
-/* Специальный стиль для номера телефона */
-.contact-link .phone {
-    font-weight: 600;
-    letter-spacing: 0.3px;
-}
-
-/* ===== КОНТАКТЫ В ШАПКЕ — АДАПТИВ ===== */
+/* ===== АДАПТИВ ===== */
 @media (max-width: 640px) {
     .contacts {
         gap: 10px;
     }
     
     .contact-link {
-        padding: 6px 12px;
+        padding: 6px 14px;
         font-size: 12px;
-        gap: 4px;
+        gap: 6px;
     }
     
-    .contact-link svg {
+    .contact-link .contact-icon {
         width: 16px;
         height: 16px;
     }
@@ -175,7 +170,7 @@ body {
         font-size: 11px;
     }
     
-    .contact-link svg {
+    .contact-link .contact-icon {
         width: 14px;
         height: 14px;
     }
