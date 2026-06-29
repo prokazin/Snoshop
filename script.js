@@ -1,4 +1,5 @@
 let products = [];
+let categories = [];
 let currentFilter = 'all';
 let currentProduct = null;
 let currentImageIndex = 0;
@@ -6,6 +7,59 @@ let currentImageIndex = 0;
 // Форматирование цены в рубли
 function formatPrice(price) {
     return price.toLocaleString('ru-RU') + ' ₽';
+}
+
+// Загрузка категорий
+function loadCategories() {
+    const stored = localStorage.getItem('shopCategories');
+    if (stored) {
+        try {
+            categories = JSON.parse(stored);
+        } catch (e) {
+            categories = ['boards', 'boots', 'bindings', 'clothes'];
+        }
+    } else {
+        categories = ['boards', 'boots', 'bindings', 'clothes'];
+        localStorage.setItem('shopCategories', JSON.stringify(categories));
+    }
+    renderCategories();
+}
+
+function renderCategories() {
+    const container = document.getElementById('categoriesContainer');
+    if (!container) return;
+    
+    const categoryNames = {
+        'all': 'Все',
+        'boards': 'Доски',
+        'boots': 'Ботинки',
+        'bindings': 'Крепления',
+        'clothes': 'Одежда'
+    };
+    
+    let html = `<button class="cat active" data-cat="all">Все</button>`;
+    
+    for (const cat of categories) {
+        const label = categoryNames[cat] || cat.charAt(0).toUpperCase() + cat.slice(1);
+        html += `<button class="cat" data-cat="${cat}">${label}</button>`;
+    }
+    
+    container.innerHTML = html;
+    
+    // Назначаем обработчики
+    document.querySelectorAll('.cat').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.cat').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.cat;
+            
+            const filtered = currentFilter === 'all' 
+                ? products 
+                : products.filter(p => p.category === currentFilter);
+            
+            renderProducts(filtered, true);
+        });
+    });
 }
 
 // Загрузка товаров
@@ -135,21 +189,6 @@ function renderProducts(items, animate = true) {
     }).join('');
 }
 
-// Фильтр по категориям
-document.querySelectorAll('.cat').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.cat').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        currentFilter = this.dataset.cat;
-        
-        const filtered = currentFilter === 'all' 
-            ? products 
-            : products.filter(p => p.category === currentFilter);
-        
-        renderProducts(filtered, true);
-    });
-});
-
 // Модальное окно товара
 function openProductModal(id) {
     currentProduct = products.find(p => p.id === id);
@@ -264,9 +303,16 @@ window.addEventListener('storage', (e) => {
             renderProducts(filtered, true);
         } catch (e) {}
     }
+    if (e.key === 'shopCategories') {
+        try {
+            categories = JSON.parse(e.newValue);
+            renderCategories();
+        } catch (e) {}
+    }
 });
 
 // Загрузка
 document.addEventListener('DOMContentLoaded', () => {
+    loadCategories();
     loadProducts();
 });
