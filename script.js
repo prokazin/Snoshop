@@ -14,7 +14,6 @@ function loadProducts() {
     if (stored) {
         try {
             products = JSON.parse(stored);
-            // Убеждаемся, что у каждого товара есть все поля
             products = products.map(p => ({
                 ...p,
                 images: p.images || [p.img || 'https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
@@ -42,7 +41,7 @@ function getDefaultProducts() {
             images: ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'],
             inStock: true,
             tags: ['хит'],
-            specs: { flex: 'Средняя 5/10', size: '158 см', color: 'Синий' }
+            specs: { 'Жёсткость': 'Средняя 5/10', 'Размер': '158 см', 'Цвет': 'Синий' }
         },
         { 
             id: 2, 
@@ -53,7 +52,7 @@ function getDefaultProducts() {
             images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800'],
             inStock: true,
             tags: ['новинка'],
-            specs: { flex: 'Средняя', size: '42', color: 'Чёрный' }
+            specs: { 'Жёсткость': 'Средняя', 'Размер': '42', 'Цвет': 'Чёрный' }
         },
         { 
             id: 3, 
@@ -64,7 +63,7 @@ function getDefaultProducts() {
             images: ['https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=800'],
             inStock: true,
             tags: ['хит'],
-            specs: { flex: 'Жёсткая', size: 'M', color: 'Серый' }
+            specs: { 'Жёсткость': 'Жёсткая', 'Размер': 'M', 'Цвет': 'Серый' }
         }
     ];
     localStorage.setItem('shopProducts', JSON.stringify(defaults));
@@ -166,17 +165,13 @@ function openProductModal(id) {
     // Характеристики
     const specsContainer = document.getElementById('modalSpecs');
     const specs = currentProduct.specs || {};
-    const specItems = [];
+    const specKeys = Object.keys(specs);
     
-    if (specs.flex) specItems.push({ label: 'Жёсткость', value: specs.flex });
-    if (specs.size) specItems.push({ label: 'Размер', value: specs.size });
-    if (specs.color) specItems.push({ label: 'Цвет', value: specs.color });
-    
-    if (specItems.length > 0) {
-        specsContainer.innerHTML = specItems.map(s => `
+    if (specKeys.length > 0) {
+        specsContainer.innerHTML = specKeys.map(key => `
             <span class="spec">
-                <span class="label">${s.label}:</span>
-                <span class="value">${s.value}</span>
+                <span class="label">${key}:</span>
+                <span class="value">${specs[key]}</span>
             </span>
         `).join('');
         specsContainer.style.display = 'flex';
