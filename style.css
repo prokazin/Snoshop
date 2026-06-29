@@ -77,6 +77,114 @@ body {
     text-transform: uppercase;
 }
 
+/* ===== КОНТАКТЫ В ШАПКЕ ===== */
+.contacts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.contact-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 0.5px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.contact-link svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.contact-link.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.contact-link.disabled:hover {
+    transform: none;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Для будущего — когда разблокируете */
+.contact-link:not(.disabled) {
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.contact-link:not(.disabled):hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.contact-link:not(.disabled) .phone {
+    color: #34c759;
+}
+
+/* Специальный стиль для номера телефона */
+.contact-link .phone {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* ===== КОНТАКТЫ В ШАПКЕ — АДАПТИВ ===== */
+@media (max-width: 640px) {
+    .contacts {
+        gap: 10px;
+    }
+    
+    .contact-link {
+        padding: 6px 12px;
+        font-size: 12px;
+        gap: 4px;
+    }
+    
+    .contact-link svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .contact-link span {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contacts {
+        gap: 6px;
+    }
+    
+    .contact-link {
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+    
+    .contact-link svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .contact-link span {
+        font-size: 10px;
+    }
+}
+
 .categories {
     display: flex;
     gap: 10px;
