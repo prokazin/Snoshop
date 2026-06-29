@@ -43,9 +43,9 @@
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
-        .admin-row-3 {
+        .admin-row-2 {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
         .admin-btn {
@@ -332,6 +332,20 @@
             display: block;
             margin-bottom: 4px;
         }
+        .specs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 6px 0 14px;
+        }
+        .specs-grid .spec-pair {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .specs-grid .spec-pair input {
+            margin: 0;
+        }
         @media (max-width: 640px) {
             .admin-panel {
                 padding: 20px;
@@ -342,7 +356,11 @@
                 grid-template-columns: 1fr;
                 gap: 0;
             }
-            .admin-row-3 {
+            .admin-row-2 {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .specs-grid {
                 grid-template-columns: 1fr;
                 gap: 0;
             }
@@ -436,22 +454,52 @@
                         <option value="clothes">Одежда</option>
                     </select>
                     
+                    <!-- 10 полей для характеристик -->
                     <div style="background:rgba(255,255,255,0.03);border-radius:16px;padding:14px;margin:6px 0 14px;border:0.5px solid rgba(255,255,255,0.04);">
-                        <div style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">📋 Характеристики (будут видны посетителям)</div>
-                        <div class="admin-row-3">
-                            <div>
-                                <label class="spec-label">Жёсткость</label>
-                                <input type="text" id="productFlex" placeholder="Например: средняя, 5/10" class="admin-input" style="margin:0;">
+                        <div style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">📋 Характеристики (заполните нужные, остальные оставьте пустыми)</div>
+                        <div class="specs-grid">
+                            <div class="spec-pair">
+                                <label class="spec-label">Характеристика 1</label>
+                                <input type="text" id="spec1" placeholder="Название: значение" class="admin-input">
                             </div>
-                            <div>
-                                <label class="spec-label">Размер</label>
-                                <input type="text" id="productSize" placeholder="Например: 158, M, 42" class="admin-input" style="margin:0;">
+                            <div class="spec-pair">
+                                <label class="spec-label">Характеристика 2</label>
+                                <input type="text" id="spec2" placeholder="Название: значение" class="admin-input">
                             </div>
-                            <div>
-                                <label class="spec-label">Цвет</label>
-                                <input type="text" id="productColor" placeholder="Например: синий, чёрный" class="admin-input" style="margin:0;">
+                            <div class="spec-pair">
+                                <label class="spec-label">Характеристика 3</label>
+                                <input type="text" id="spec3" placeholder="Название: значение" class="admin-input">
+                            </div>
+                            <div class="spec-pair">
+                                <label class="spec-label">Характеристика 4</label>
+                                <input type="text" id="spec4" placeholder="Название: значение" class="admin-input">
+                            </div>
+                            <div class="spec-pair">
+                                <label class="spec-label">Характеристика 5</label>
+                                <input type="text" id="spec5" placeholder="Название: значение" class="admin-input">
+                            </div>
+                            <div class="spec-pair">
+                                <label class="spec-label">Характеристика 6</label>
+                                <input type="text" id="spec6" placeholder="Название: значение" class="admin-input">
+                            </div>
+                            <div class="spec-pair">
+                                <label class="spec-label">Характеристика 7</label>
+                                <input type="text" id="spec7" placeholder="Название: значение" class="admin-input">
+                            </div>
+                            <div class="spec-pair">
+                                <label class="spec-label">Характеристика 8</label>
+                                <input type="text" id="spec8" placeholder="Название: значение" class="admin-input">
+                            </div>
+                            <div class="spec-pair">
+                                <label class="spec-label">Характеристика 9</label>
+                                <input type="text" id="spec9" placeholder="Название: значение" class="admin-input">
+                            </div>
+                            <div class="spec-pair">
+                                <label class="spec-label">Характеристика 10</label>
+                                <input type="text" id="spec10" placeholder="Название: значение" class="admin-input">
                             </div>
                         </div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:6px;">Формат: <strong>Название: значение</strong> (например: Жёсткость: 5/10)</div>
                     </div>
                     
                     <div class="image-upload-area" id="imageUploadArea" onclick="document.getElementById('imageInput').click()">
@@ -590,8 +638,6 @@
             const list = document.getElementById('adminProductList');
             if (!list) return;
             
-            console.log('renderAdminList вызван, товаров:', products.length);
-            
             let filtered = [...products];
             
             if (searchQuery) {
@@ -621,11 +667,8 @@
                 const imagesCount = p.images ? p.images.length : 0;
                 
                 const specs = p.specs || {};
-                const specsStr = [];
-                if (specs.flex) specsStr.push(`💪${specs.flex}`);
-                if (specs.size) specsStr.push(`📏${specs.size}`);
-                if (specs.color) specsStr.push(`🎨${specs.color}`);
-                const specsDisplay = specsStr.length > 0 ? specsStr.join(' · ') : '';
+                const specKeys = Object.keys(specs);
+                const specsDisplay = specKeys.length > 0 ? specKeys.map(k => `${k}: ${specs[k]}`).join(' · ') : '';
                 
                 return `
                 <div class="admin-item">
@@ -654,6 +697,71 @@
             document.getElementById('bindingsCount').textContent = products.filter(p => p.category === 'bindings').length;
         }
 
+        function parseSpec(value) {
+            if (!value || !value.includes(':')) return null;
+            const parts = value.split(':');
+            const key = parts[0].trim();
+            const val = parts.slice(1).join(':').trim();
+            if (key && val) {
+                return { key, value: val };
+            }
+            return null;
+        }
+
+        function getSpecs() {
+            const specs = {};
+            const specInputs = [
+                document.getElementById('spec1'),
+                document.getElementById('spec2'),
+                document.getElementById('spec3'),
+                document.getElementById('spec4'),
+                document.getElementById('spec5'),
+                document.getElementById('spec6'),
+                document.getElementById('spec7'),
+                document.getElementById('spec8'),
+                document.getElementById('spec9'),
+                document.getElementById('spec10')
+            ];
+            
+            for (const input of specInputs) {
+                if (!input) continue;
+                const parsed = parseSpec(input.value);
+                if (parsed) {
+                    specs[parsed.key] = parsed.value;
+                }
+            }
+            return specs;
+        }
+
+        function setSpecs(specs) {
+            const specInputs = [
+                document.getElementById('spec1'),
+                document.getElementById('spec2'),
+                document.getElementById('spec3'),
+                document.getElementById('spec4'),
+                document.getElementById('spec5'),
+                document.getElementById('spec6'),
+                document.getElementById('spec7'),
+                document.getElementById('spec8'),
+                document.getElementById('spec9'),
+                document.getElementById('spec10')
+            ];
+            
+            if (!specs || Object.keys(specs).length === 0) {
+                for (const input of specInputs) {
+                    if (input) input.value = '';
+                }
+                return;
+            }
+            
+            const keys = Object.keys(specs);
+            for (let i = 0; i < specInputs.length && i < keys.length; i++) {
+                if (specInputs[i]) {
+                    specInputs[i].value = keys[i] + ': ' + specs[keys[i]];
+                }
+            }
+        }
+
         function addProduct() {
             const editId = document.getElementById('editId').value;
             const name = document.getElementById('productName').value.trim();
@@ -661,10 +769,6 @@
             const category = document.getElementById('productCategory').value;
             const desc = document.getElementById('productDesc').value.trim();
             const inStock = document.getElementById('inStock').checked;
-            
-            const flex = document.getElementById('productFlex').value.trim();
-            const size = document.getElementById('productSize').value.trim();
-            const color = document.getElementById('productColor').value.trim();
             
             const tags = [];
             if (document.getElementById('isHit').checked) tags.push('хит');
@@ -680,11 +784,7 @@
                 return;
             }
 
-            const specs = {};
-            if (flex) specs.flex = flex;
-            if (size) specs.size = size;
-            if (color) specs.color = color;
-
+            const specs = getSpecs();
             const images = tempImages.length > 0 ? tempImages : ['https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=800'];
 
             if (editId) {
@@ -699,7 +799,7 @@
                         inStock,
                         tags,
                         images,
-                        specs: Object.keys(specs).length > 0 ? specs : undefined
+                        specs: Object.keys(specs).length > 0 ? specs : {}
                     };
                     showToast('✅ Товар обновлён!');
                 } else {
@@ -720,19 +820,14 @@
                     inStock: inStock,
                     tags: tags,
                     images: images,
-                    specs: Object.keys(specs).length > 0 ? specs : undefined,
+                    specs: Object.keys(specs).length > 0 ? specs : {},
                     rating: 0
                 };
                 products.push(newProduct);
                 showToast('✅ Товар добавлен!');
             }
             
-            // Сохраняем в localStorage
             localStorage.setItem('shopProducts', JSON.stringify(products));
-            
-            console.log('Товары после сохранения:', products);
-            
-            // Обновляем отображение
             renderAdminList();
             updateStats();
             clearForm();
@@ -752,10 +847,7 @@
             document.getElementById('isNew').checked = (p.tags || []).includes('новинка');
             document.getElementById('isPremium').checked = (p.tags || []).includes('премиум');
             
-            const specs = p.specs || {};
-            document.getElementById('productFlex').value = specs.flex || '';
-            document.getElementById('productSize').value = specs.size || '';
-            document.getElementById('productColor').value = specs.color || '';
+            setSpecs(p.specs || {});
             
             tempImages = p.images ? [...p.images] : [];
             renderImagePreviews();
@@ -785,7 +877,7 @@
                 name: p.name + ' (копия)',
                 tags: [...(p.tags || [])],
                 images: [...(p.images || [])],
-                specs: p.specs ? { ...p.specs } : undefined
+                specs: p.specs ? { ...p.specs } : {}
             };
             products.push(copy);
             localStorage.setItem('shopProducts', JSON.stringify(products));
@@ -868,9 +960,13 @@
             document.getElementById('isNew').checked = false;
             document.getElementById('isPremium').checked = false;
             
-            document.getElementById('productFlex').value = '';
-            document.getElementById('productSize').value = '';
-            document.getElementById('productColor').value = '';
+            const specInputs = [
+                'spec1', 'spec2', 'spec3', 'spec4', 'spec5',
+                'spec6', 'spec7', 'spec8', 'spec9', 'spec10'
+            ];
+            for (const id of specInputs) {
+                document.getElementById(id).value = '';
+            }
             
             tempImages = [];
             renderImagePreviews();
