@@ -9,7 +9,7 @@ function formatPrice(price) {
     return price.toLocaleString('ru-RU') + ' ₽';
 }
 
-// Загрузка категорий
+// Загрузка категорий из localStorage
 function loadCategories() {
     const stored = localStorage.getItem('shopCategories');
     if (stored) {
@@ -19,6 +19,7 @@ function loadCategories() {
             categories = ['boards', 'boots', 'bindings', 'clothes'];
         }
     } else {
+        // Если категорий нет в localStorage, создаём дефолтные
         categories = ['boards', 'boots', 'bindings', 'clothes'];
         localStorage.setItem('shopCategories', JSON.stringify(categories));
     }
@@ -29,6 +30,7 @@ function renderCategories() {
     const container = document.getElementById('categoriesContainer');
     if (!container) return;
     
+    // Словарь для отображения названий категорий
     const categoryNames = {
         'all': 'Все',
         'boards': 'Доски',
@@ -37,8 +39,10 @@ function renderCategories() {
         'clothes': 'Одежда'
     };
     
+    // Всегда показываем кнопку "Все"
     let html = `<button class="cat active" data-cat="all">Все</button>`;
     
+    // Показываем только те категории, которые есть в списке
     for (const cat of categories) {
         const label = categoryNames[cat] || cat.charAt(0).toUpperCase() + cat.slice(1);
         html += `<button class="cat" data-cat="${cat}">${label}</button>`;
@@ -46,7 +50,7 @@ function renderCategories() {
     
     container.innerHTML = html;
     
-    // Назначаем обработчики
+    // Назначаем обработчики для всех кнопок категорий
     document.querySelectorAll('.cat').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.cat').forEach(b => b.classList.remove('active'));
@@ -201,7 +205,6 @@ function openProductModal(id) {
     document.getElementById('modalPrice').textContent = formatPrice(currentProduct.price);
     document.getElementById('modalDesc').textContent = currentProduct.desc || 'Без описания';
     
-    // Характеристики
     const specsContainer = document.getElementById('modalSpecs');
     const specs = currentProduct.specs || {};
     const specKeys = Object.keys(specs);
@@ -218,7 +221,6 @@ function openProductModal(id) {
         specsContainer.style.display = 'none';
     }
     
-    // Теги
     const tagsContainer = document.getElementById('modalTags');
     if (currentProduct.tags && currentProduct.tags.length > 0) {
         const colors = {
@@ -235,7 +237,6 @@ function openProductModal(id) {
         tagsContainer.innerHTML = '';
     }
     
-    // Наличие
     const stockContainer = document.getElementById('modalStock');
     if (currentProduct.inStock !== undefined) {
         stockContainer.textContent = currentProduct.inStock ? '● В наличии' : '● Нет в наличии';
@@ -245,7 +246,6 @@ function openProductModal(id) {
         stockContainer.style.display = 'none';
     }
     
-    // Изображения
     updateModalImage();
     
     modal.classList.add('active');
@@ -307,6 +307,11 @@ window.addEventListener('storage', (e) => {
         try {
             categories = JSON.parse(e.newValue);
             renderCategories();
+            // После обновления категорий, обновляем отображение товаров с текущим фильтром
+            const filtered = currentFilter === 'all' 
+                ? products 
+                : products.filter(p => p.category === currentFilter);
+            renderProducts(filtered, true);
         } catch (e) {}
     }
 });
