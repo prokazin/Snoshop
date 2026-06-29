@@ -19,7 +19,6 @@ function loadCategories() {
             categories = ['boards', 'boots', 'bindings', 'clothes'];
         }
     } else {
-        // Если категорий нет в localStorage, создаём дефолтные
         categories = ['boards', 'boots', 'bindings', 'clothes'];
         localStorage.setItem('shopCategories', JSON.stringify(categories));
     }
@@ -30,7 +29,6 @@ function renderCategories() {
     const container = document.getElementById('categoriesContainer');
     if (!container) return;
     
-    // Словарь для отображения названий категорий
     const categoryNames = {
         'all': 'Все',
         'boards': 'Доски',
@@ -39,10 +37,8 @@ function renderCategories() {
         'clothes': 'Одежда'
     };
     
-    // Всегда показываем кнопку "Все"
     let html = `<button class="cat active" data-cat="all">Все</button>`;
     
-    // Показываем только те категории, которые есть в списке
     for (const cat of categories) {
         const label = categoryNames[cat] || cat.charAt(0).toUpperCase() + cat.slice(1);
         html += `<button class="cat" data-cat="${cat}">${label}</button>`;
@@ -50,7 +46,6 @@ function renderCategories() {
     
     container.innerHTML = html;
     
-    // Назначаем обработчики для всех кнопок категорий
     document.querySelectorAll('.cat').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.cat').forEach(b => b.classList.remove('active'));
@@ -153,6 +148,7 @@ function renderProducts(items, animate = true) {
     }
     
     grid.innerHTML = items.map((p, index) => {
+        // Метки (теги) — Хит, Новинка, Премиум
         let tagsHtml = '';
         if (p.tags && p.tags.length > 0) {
             tagsHtml = p.tags.map(tag => {
@@ -164,13 +160,14 @@ function renderProducts(items, animate = true) {
                     'скидка': '#ff3b30'
                 };
                 const color = colors[tag] || '#8e8e93';
-                return `<span style="background:${color}20;color:${color};padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;margin-right:4px;">${tag.toUpperCase()}</span>`;
+                return `<span class="product-tag" style="background:${color}20;color:${color};">${tag}</span>`;
             }).join('');
         }
         
+        // Статус наличия
         const stockHtml = p.inStock !== undefined ? `
-            <span style="color:${p.inStock ? '#34c759' : '#ff3b30'};font-size:12px;font-weight:500;">
-                ${p.inStock ? '● В наличии' : '● Нет в наличии'}
+            <span class="product-stock ${p.inStock ? 'in-stock' : 'out-of-stock'}">
+                ${p.inStock ? 'В наличии' : 'Нет в наличии'}
             </span>
         ` : '';
         
@@ -179,13 +176,11 @@ function renderProducts(items, animate = true) {
         return `
             <div class="product-card" style="animation-delay: ${(index * 0.05).toFixed(2)}s;" onclick="openProductModal(${p.id})">
                 <img src="${imgSrc}" class="product-image" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1551503766-ac63dfa6401c?w=400'">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;margin-bottom:4px;">
-                    <div class="product-name">${p.name}</div>
-                </div>
+                <div class="product-name">${p.name}</div>
                 <div class="product-price">${formatPrice(p.price)}</div>
                 <div class="product-desc">${p.desc || 'Без описания'}</div>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-                    <div>${tagsHtml}</div>
+                <div class="product-footer">
+                    <div class="product-tags">${tagsHtml}</div>
                     ${stockHtml}
                 </div>
             </div>
@@ -307,7 +302,6 @@ window.addEventListener('storage', (e) => {
         try {
             categories = JSON.parse(e.newValue);
             renderCategories();
-            // После обновления категорий, обновляем отображение товаров с текущим фильтром
             const filtered = currentFilter === 'all' 
                 ? products 
                 : products.filter(p => p.category === currentFilter);
